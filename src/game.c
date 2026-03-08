@@ -19,8 +19,9 @@ void UpdateGame(GameState *state) {
     // Player movements
     if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) state->player_paddle.y -= 7;
     if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < SCREEN_HEIGHT) state->player_paddle.y += 7;
-
-    
+    // Oponent movements
+    if(IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0) state->oponent_paddle.y -= 7;
+    if(IsKeyDown(KEY_RIGHT) && state->oponent_paddle.y + state->oponent_paddle.height < SCREEN_HEIGHT) state->oponent_paddle.y += 7; 
 }
 
 void DrawGame(GameState *state) {
