@@ -4,6 +4,10 @@
 #include <raylib.h>
 
 typedef struct {
+    Rectangle player_paddle;
+    Rectangle oponent_paddle;
+    Vector2 ball_position;
+    Vector2 ball_speed;
     int player_score;
     int oponent_score;
     bool game_over;

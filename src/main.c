@@ -15,8 +15,7 @@ int main(void) {
 
         UpdateGame(&state);
         DrawGame(&state);
-        
-        DrawText("Hello Pong", 500, 350, 35, WHITE);
+
         EndDrawing();
     }
     CloseGame(&state);
