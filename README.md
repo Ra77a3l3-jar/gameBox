@@ -4,17 +4,17 @@ pong game written in C using raylib
 
 ## Roadmap
 
-- [ ] Core
-  - [ ] Window
-  - [ ] Game loop
+- [X] Core
+  - [X] Window
+  - [X] Game loop
 
 - [ ] Rendering
-  - [ ] Paddles
+  - [X] Paddles
   - [ ] Ball
   - [ ] Score
 
 - [ ] Gameplay
-  - [ ] Input
+  - [X] Input
   - [ ] Ball movement
   - [ ] Collisions
   - [ ] Scoring
