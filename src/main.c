@@ -4,7 +4,10 @@
 
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pong");
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(120);
+
+    SetExitKey(KEY_NULL); // Esc key can be reused
 
     GameState state = {0};
     InitGame(&state);
