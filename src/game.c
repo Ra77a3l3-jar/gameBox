@@ -63,6 +63,8 @@ void UpdateGame(GameState *state) {
             state->current_screen = GAMEPLAY;
         } else if(state->current_screen == SETTINGS) {
             state->current_screen = MENU;
+        } else if(state->current_screen == MENU) {
+            exit(0);
         }
     }
     
@@ -150,6 +152,7 @@ void DrawGame(GameState *state) {
                 DrawText("Press 1 for PvP", GetScreenWidth()/2 - MeasureText("Press 1 for PvP", 30)/2, GetScreenHeight()/2, 30, WHITE);
                 DrawText("Press 2 for PvE", GetScreenWidth()/2 - MeasureText("Press 2 for PvE", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
                 DrawText("Press S for Settings", GetScreenWidth()/2 - MeasureText("Press S for Settings", 30)/2, GetScreenHeight()/2 + 80, 30, WHITE);
+                DrawText("Press ESC to Exit", GetScreenWidth()/2 - MeasureText("Press ESC to Exit", 30)/2, GetScreenHeight()/2 + 120, 30, WHITE);
                 if (IsKeyPressed(KEY_ONE)) {
                     state->vs_computer = false;
                     state->current_screen = GAMEPLAY;
