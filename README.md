@@ -8,19 +8,19 @@ pong game written in C using raylib
   - [X] Window
   - [X] Game loop
 
-- [ ] Rendering
+- [X] Rendering
   - [X] Paddles
-  - [ ] Ball
-  - [ ] Score
+  - [X] Ball
+  - [X] Score
 
-- [ ] Gameplay
+- [X] Gameplay
   - [X] Input
-  - [ ] Ball movement
-  - [ ] Collisions
-  - [ ] Scoring
+  - [X] Ball movement
+  - [X] Collisions
+  - [X] Scoring
 
 - [ ] Extras
   - [ ] AI
   - [ ] Sound
-  - [ ] Menu
+  - [X] Menu
   - [ ] Polish
