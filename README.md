@@ -20,7 +20,7 @@ pong game written in C using raylib
   - [X] Scoring
 
 - [ ] Extras
-  - [ ] AI
-  - [ ] Sound
+  - [X] AI
+  - [X] Sound
   - [X] Menu
   - [ ] Polish
