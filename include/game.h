@@ -6,7 +6,9 @@
 typedef enum {
     MENU,
     GAMEPLAY,
-    PAUSED
+    PAUSED,
+    SETTINGS,
+    VICTORY
 } GameScreen;
 
 typedef struct {
@@ -22,6 +24,14 @@ typedef struct {
     Sound paddle_hit_sound;
     Sound score_sound;
     Sound wall_hit_sound;
+
+    // Settings
+    int difficulty_level; // 1-5, ULTIMATE=6
+    int victory_points; // 5, 10, 15, 20
+    float computer_movement_speed;
+
+    int victory_timer;
+    int victory_player; // 0 Player, 1 Opponent
 } GameState;
 
 void InitGame(GameState *state);

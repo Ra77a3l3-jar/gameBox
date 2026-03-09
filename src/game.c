@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include "game.h"
 
+#define DIFFICULTY_LEVELS 6
+float difficulty_speeds[DIFFICULTY_LEVELS] = {2.3, 2.6, 2.9, 3.2, 3.5, 4.5};
+
+#define VICTORY_POINTS_OPTIONS 4
+int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
+
 void InitGame(GameState *state) {
     state->current_screen = MENU;
     state->vs_computer = false;
@@ -16,6 +22,10 @@ void InitGame(GameState *state) {
     state->player_score = 0;
     state->oponent_score = 0;
     state->game_over = false;
+
+    state->difficulty_level = 2;
+    state->victory_points = 10;
+    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
 
     state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
     state->score_sound = LoadSound("assets/audio/pong_score.wav");
@@ -51,6 +61,8 @@ void UpdateGame(GameState *state) {
             state->current_screen = PAUSED;
         } else if(state->current_screen == PAUSED) {
             state->current_screen = GAMEPLAY;
+        } else if(state->current_screen == SETTINGS) {
+            state->current_screen = MENU;
         }
     }
     
@@ -65,8 +77,6 @@ void UpdateGame(GameState *state) {
 
         // Computer movement
         if(state->vs_computer) {
-            float computer_movement_speed = 2.5; // Maximum pixels per frame (increase for higher difficulty)
-
             if(state->ball_speed.x > 0) { // React only if ball going towords oponent paddle
                 float error = (rand() % 21) - 10; // Random ofset to simulate imperfection (-10 10)
                 float target = state->ball_position.y - state->oponent_paddle.height/2 + error;
@@ -74,9 +84,9 @@ void UpdateGame(GameState *state) {
 
                 // Paddle movement towwords target
                 if(state->oponent_paddle.y < target) {
-                    state->oponent_paddle.y += computer_movement_speed;
+                    state->oponent_paddle.y += state->computer_movement_speed;
                 } else if(state->oponent_paddle.y > target) {
-                    state->oponent_paddle.y -= computer_movement_speed;
+                    state->oponent_paddle.y -= state->computer_movement_speed;
                 }
             }
         } else {
@@ -117,6 +127,17 @@ void UpdateGame(GameState *state) {
             state->ball_speed = (Vector2){-5, 3};
             PlaySound(state->score_sound);
         }
+
+        // Check for Victory
+        if(state->player_score >= state->victory_points) {
+            state->victory_player = 0;
+            state->victory_timer = 240; // 2s at 120fps
+            state->current_screen = VICTORY;
+        } else if(state->oponent_score >= state->victory_points) {
+            state->victory_player = 1;
+            state->victory_timer = 240;
+            state->current_screen = VICTORY;
+        }
     }
 }
 
@@ -128,12 +149,15 @@ void DrawGame(GameState *state) {
                 // Draw options
                 DrawText("Press 1 for PvP", GetScreenWidth()/2 - MeasureText("Press 1 for PvP", 30)/2, GetScreenHeight()/2, 30, WHITE);
                 DrawText("Press 2 for PvE", GetScreenWidth()/2 - MeasureText("Press 2 for PvE", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
+                DrawText("Press S for Settings", GetScreenWidth()/2 - MeasureText("Press S for Settings", 30)/2, GetScreenHeight()/2 + 80, 30, WHITE);
                 if (IsKeyPressed(KEY_ONE)) {
                     state->vs_computer = false;
                     state->current_screen = GAMEPLAY;
                 } else if (IsKeyPressed(KEY_TWO)) {
                     state->vs_computer = true;
                     state->current_screen = GAMEPLAY;
+                } else if (IsKeyPressed(KEY_S)) {
+                    state->current_screen = SETTINGS;
                 }
                 break;
         }
@@ -162,6 +186,42 @@ void DrawGame(GameState *state) {
                     InitGame(state); // Reset game state
                 }
                 break;
+        }
+        case SETTINGS: {
+                DrawText("SETTINGS", GetScreenWidth()/2 - MeasureText("SETTINGS", 40)/2, 100, 40, WHITE);
+
+                // Difficulty slider
+                DrawText("Difficulty", 200, 200, 25, WHITE);
+                for(int i = 0; i < DIFFICULTY_LEVELS; i++) {
+                    Color color = (i == state->difficulty_level) ? GREEN : GRAY;
+                    DrawRectangle(400 + i * 50, 200, 20, 20, color);
+                    DrawText(TextFormat("%d", i + 1), 400 + i * 50, 230, 15, WHITE);
+                }
+                if(IsKeyPressed(KEY_LEFT) && state->difficulty_level > 0) {
+                    state->difficulty_level--;
+                    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+                }
+                if(IsKeyPressed(KEY_RIGHT) && state->difficulty_level < DIFFICULTY_LEVELS - 1) {
+                    state->difficulty_level++;
+                    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+                }
+
+                DrawText("Press ESC to return to menu", GetScreenWidth()/2 - MeasureText("Press ESC to return to menu", 20)/2, 500, 20, WHITE);
+                break;
+        }
+        case VICTORY: {
+                const char *winner = (state->victory_player == 0) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
+
+                DrawText(winner, GetScreenWidth()/2 - MeasureText(winner, 50)/2, GetScreenHeight()/2 - 50, 50, GREEN);
+
+                DrawText("Press M to return to menu", GetScreenWidth()/2 - MeasureText("Press M to return to menu", 30)/2, GetScreenHeight()/2 + 50, 30, WHITE);
+
+                state->victory_timer--;
+                if(state->victory_timer <= 0 || IsKeyPressed(KEY_M)) {
+                    state->current_screen = MENU;
+                    InitGame(state);
+                }
+                break;        
         }
     }
 }
