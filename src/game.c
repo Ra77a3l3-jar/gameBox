@@ -15,6 +15,10 @@ void InitGame(GameState *state) {
     state->player_score = 0;
     state->oponent_score = 0;
     state->game_over = false;
+
+    state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
+    state->score_sound = LoadSound("assets/audio/pong_score.wav");
+    state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
 }
 
 void UpdateGame(GameState *state) {
@@ -81,12 +85,14 @@ void UpdateGame(GameState *state) {
         // Ball collision with Top and Botom
         if (state->ball_position.y <= 0 || state->ball_position.y >= GetScreenHeight()) {
             state->ball_speed.y *= -1;
+            PlaySound(state->wall_hit_sound);
         }
 
         // Ball collision with Paddle
         if (CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
             CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
             state->ball_speed.x *= -1;
+            PlaySound(state->paddle_hit_sound);
         }
 
         // Scoring
@@ -94,10 +100,12 @@ void UpdateGame(GameState *state) {
             state->oponent_score++;
             state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
             state->ball_speed = (Vector2){5, 3};
+            PlaySound(state->score_sound);
         } else if (state->ball_position.x >= GetScreenWidth()) {
             state->player_score++;
             state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
             state->ball_speed = (Vector2){-5, 3};
+            PlaySound(state->score_sound);
         }
     }
 }

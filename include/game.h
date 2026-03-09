@@ -19,6 +19,9 @@ typedef struct {
     int oponent_score;
     bool game_over;
     bool vs_computer;
+    Sound paddle_hit_sound;
+    Sound score_sound;
+    Sound wall_hit_sound;
 } GameState;
 
 void InitGame(GameState *state);
