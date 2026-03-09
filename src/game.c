@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <stdbool.h>
 #include "game.h"
+#include "stdlib.h"
 
 void InitGame(GameState *state) {
     state->player_paddle = (Rectangle){20, GetScreenHeight()/2 - 50, 20, 100};
@@ -35,6 +36,17 @@ void UpdateGame(GameState *state) {
        CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
         state->ball_speed.x *= -1;
     }
+
+    // Scoring
+    if(state->ball_position.x <= 0) {
+        state->oponent_score++;
+        state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
+        state->ball_speed = (Vector2){5, 3};
+    } else if(state->ball_position.x >= GetScreenWidth()) {
+        state->player_score++;
+        state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
+        state->ball_speed = (Vector2){-5, 3};
+    }
 }
 
 void DrawGame(GameState *state) {
@@ -44,6 +56,10 @@ void DrawGame(GameState *state) {
 
     // Draw ball
     DrawCircleV(state->ball_position, 10, WHITE);
+
+    // Draw points
+    DrawText(TextFormat("%d", state->player_score), GetScreenWidth()/4, 50, 30, WHITE);
+    DrawText(TextFormat("%d", state->oponent_score), 3*GetScreenWidth()/4, 50, 30, WHITE);
 }
 
 void CloseGame(GameState *state) {
