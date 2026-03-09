@@ -7,6 +7,8 @@ int main(void) {
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(120);
 
+    InitAudioDevice();
+
     SetExitKey(KEY_NULL); // Esc key can be reused
 
     GameState state = {0};
@@ -21,5 +23,8 @@ int main(void) {
 
         EndDrawing();
     }
+
+    CloseGame(&state);
+    CloseAudioDevice();
     CloseWindow();
 }

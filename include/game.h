@@ -27,5 +27,6 @@ typedef struct {
 void InitGame(GameState *state);
 void UpdateGame(GameState *state);
 void DrawGame(GameState *state);
+void CloseGame(GameState *state);
 
 #endif

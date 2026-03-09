@@ -155,3 +155,9 @@ void DrawGame(GameState *state) {
         }
     }
 }
+
+void CloseGame(GameState *state) {
+    UnloadSound(state->paddle_hit_sound);
+    UnloadSound(state->score_sound);
+    UnloadSound(state->wall_hit_sound);
+}
