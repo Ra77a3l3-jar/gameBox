@@ -19,6 +19,28 @@ void InitGame(GameState *state) {
 
 void UpdateGame(GameState *state) {
 
+    if(IsWindowResized()) {
+        // Keep player paddle on left side (x stays at 20)
+        // Update opponent paddle to stay on right side
+        state->oponent_paddle.x = GetScreenWidth() - 40;
+        
+        // Adjust paddle Y position to suite new screen bounds
+        if(state->player_paddle.y + state->player_paddle.height > GetScreenHeight()) {
+            state->player_paddle.y = GetScreenHeight() - state->player_paddle.height;
+        }
+        if(state->oponent_paddle.y + state->oponent_paddle.height > GetScreenHeight()) {
+            state->oponent_paddle.y = GetScreenHeight() - state->oponent_paddle.height;
+        }
+        
+        // Adjust ball position to new screen bounds
+        if(state->ball_position.x > GetScreenWidth()) {
+            state->ball_position.x = GetScreenWidth() - 20;
+        }
+        if(state->ball_position.y > GetScreenHeight()) {
+            state->ball_position.y = GetScreenHeight() - 20;
+        }
+    }
+
     if(IsKeyPressed(KEY_ESCAPE)) {
         if(state->current_screen == GAMEPLAY) {
             state->current_screen = PAUSED;
@@ -29,20 +51,27 @@ void UpdateGame(GameState *state) {
     
     if(state->current_screen == GAMEPLAY) {
         // Player movement
-        if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) state->player_paddle.y -= 7;
-        if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) state->player_paddle.y += 7;
+        if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) {
+            state->player_paddle.y -= 7;
+        }
+        if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) {
+            state->player_paddle.y += 7;
+        }
 
         // Computer movement
         if(state->vs_computer) {
-            if (state->oponent_paddle.y + state->oponent_paddle.height/2 < state->ball_position.y)
+            if (state->oponent_paddle.y + state->oponent_paddle.height/2 < state->ball_position.y) {
                 state->oponent_paddle.y += 3;
-            else if (state->oponent_paddle.y + state->oponent_paddle.height/2 > state->ball_position.y)
+            } else if (state->oponent_paddle.y + state->oponent_paddle.height/2 > state->ball_position.y) {
                 state->oponent_paddle.y -= 3;
+            }
         } else {
-            if (IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0)
+            if (IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0) {
                 state->oponent_paddle.y -= 7;
-            if (IsKeyDown(KEY_DOWN) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight())
+            }
+            if (IsKeyDown(KEY_DOWN) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight()) {
                 state->oponent_paddle.y += 7;
+            }
         }
 
         // Ball movement
@@ -50,13 +79,15 @@ void UpdateGame(GameState *state) {
         state->ball_position.y += state->ball_speed.y;
 
         // Ball collision with Top and Botom
-        if (state->ball_position.y <= 0 || state->ball_position.y >= GetScreenHeight())
+        if (state->ball_position.y <= 0 || state->ball_position.y >= GetScreenHeight()) {
             state->ball_speed.y *= -1;
+        }
 
         // Ball collision with Paddle
         if (CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
-            CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle))
+            CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
             state->ball_speed.x *= -1;
+        }
 
         // Scoring
         if (state->ball_position.x <= 0) {
@@ -115,8 +146,4 @@ void DrawGame(GameState *state) {
                 break;
         }
     }
-}
-
-void CloseGame(GameState *state) {
-    
 }

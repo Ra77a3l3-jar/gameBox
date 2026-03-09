@@ -21,6 +21,5 @@ int main(void) {
 
         EndDrawing();
     }
-    CloseGame(&state);
     CloseWindow();
 }
