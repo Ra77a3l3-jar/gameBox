@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "game.h"
 
 void InitGame(GameState *state) {
@@ -64,10 +65,19 @@ void UpdateGame(GameState *state) {
 
         // Computer movement
         if(state->vs_computer) {
-            if (state->oponent_paddle.y + state->oponent_paddle.height/2 < state->ball_position.y) {
-                state->oponent_paddle.y += 3;
-            } else if (state->oponent_paddle.y + state->oponent_paddle.height/2 > state->ball_position.y) {
-                state->oponent_paddle.y -= 3;
+            float computer_movement_speed = 2.5; // Maximum pixels per frame (increase for higher difficulty)
+
+            if(state->ball_speed.x > 0) { // React only if ball going towords oponent paddle
+                float error = (rand() % 21) - 10; // Random ofset to simulate imperfection (-10 10)
+                float target = state->ball_position.y - state->oponent_paddle.height/2 + error;
+                // Position where the paddle wants to get (aligns paddle with ball centre plus the offset)
+
+                // Paddle movement towwords target
+                if(state->oponent_paddle.y < target) {
+                    state->oponent_paddle.y += computer_movement_speed;
+                } else if(state->oponent_paddle.y > target) {
+                    state->oponent_paddle.y -= computer_movement_speed;
+                }
             }
         } else {
             if (IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0) {
