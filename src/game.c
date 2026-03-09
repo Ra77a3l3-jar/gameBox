@@ -18,15 +18,32 @@ void UpdateGame(GameState *state) {
     // Player movements
     if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) state->player_paddle.y -= 7;
     if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) state->player_paddle.y += 7;
+
     // Oponent movements
     if(IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0) state->oponent_paddle.y -= 7;
-    if(IsKeyDown(KEY_RIGHT) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight()) state->oponent_paddle.y += 7; 
+    if(IsKeyDown(KEY_RIGHT) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight()) state->oponent_paddle.y += 7;
+
+    // Ball movements
+    state->ball_position.x += state->ball_speed.x;
+    state->ball_position.y += state->ball_speed.y;
+    
+    // Ball collisions with Top and Botom
+    if(state->ball_position.y <= 0 || state->ball_position.y >= GetScreenHeight()) state->ball_speed.y *= -1;
+
+    // Ball collision with Paddle    
+    if(CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
+       CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
+        state->ball_speed.x *= -1;
+    }
 }
 
 void DrawGame(GameState *state) {
     // Player paddle texture
     DrawRectangleRec(state->player_paddle, WHITE);
     DrawRectangleRec(state->oponent_paddle, WHITE);
+
+    // Draw ball
+    DrawCircleV(state->ball_position, 10, WHITE);
 }
 
 void CloseGame(GameState *state) {
