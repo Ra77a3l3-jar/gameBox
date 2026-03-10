@@ -209,8 +209,32 @@ void DrawGame(GameState *state) {
                     state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
                 }
 
+                // Victory point slider
+                DrawText("Victory Points", 200, 300, 25, WHITE);
+                for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
+                    Color color = (victory_points_options[i] == state->victory_points) ? RED : GRAY;
+                    DrawRectangle(400 + i * 50, 300, 20, 20, color);
+                    DrawText(TextFormat("%d", victory_points_options[i]), 400 + i * 50, 330, 15, WHITE);
+                }
+                if(IsKeyPressed(KEY_UP)) {
+                    for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
+                        if(victory_points_options[i] == state->victory_points) {
+                            state->victory_points = victory_points_options[(i + VICTORY_POINTS_OPTIONS - 1) % VICTORY_POINTS_OPTIONS];
+                            break;
+                        }
+                    }
+                }
+                if(IsKeyPressed(KEY_DOWN)) {
+                    for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
+                        if(victory_points_options[i] == state->victory_points) {
+                        state->victory_points = victory_points_options[(i + 1) % VICTORY_POINTS_OPTIONS];
+                        break;
+                        }
+                    }
+                }
+
                 DrawText("Press ESC to return to menu", GetScreenWidth()/2 - MeasureText("Press ESC to return to menu", 20)/2, 500, 20, WHITE);
-                break;
+                break;                                
         }
         case VICTORY: {
                 const char *winner = (state->victory_player == 0) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
