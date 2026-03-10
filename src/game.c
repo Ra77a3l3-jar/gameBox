@@ -114,6 +114,16 @@ void UpdateGame(GameState *state) {
         if (CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
             CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
             state->ball_speed.x *= -1;
+
+            // Calculate relative intersection point (0.0 1.0)
+            Rectangle *paddle = CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ? &state->player_paddle : &state->oponent_paddle;
+            float relative_y_intersection = (state->ball_position.y - paddle->y) / paddle->height;
+
+            /* Adjust ball speed based on where it hit
+               The middle of the paddle does not change the y of balls trajectory
+               Top and bottom of paddle increase y speed */
+            state->ball_speed.y = (relative_y_intersection - 0.5) * 10; // Scale factor of the bounce angle
+
             PlaySound(state->paddle_hit_sound);
         }
 
