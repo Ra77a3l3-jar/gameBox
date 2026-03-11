@@ -70,12 +70,16 @@ void UpdateGame(GameState *state) {
     
     if(state->current_screen == GAMEPLAY) {
         // Player movement
+        float prev_player_y = state->player_paddle.y;
+        float prev_oponent_y = state->oponent_paddle.y;
+        
         if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) {
             state->player_paddle.y -= 7;
         }
         if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) {
             state->player_paddle.y += 7;
         }
+        state->player_paddle_speed = state->player_paddle.y - prev_player_y;
 
         // Computer movement
         if(state->vs_computer) {
@@ -99,6 +103,7 @@ void UpdateGame(GameState *state) {
                 state->oponent_paddle.y += 7;
             }
         }
+        state->oponent_paddle_speed = state->oponent_paddle.y - prev_oponent_y;
 
         // Ball movement
         state->ball_position.x += state->ball_speed.x;
@@ -113,16 +118,19 @@ void UpdateGame(GameState *state) {
         // Ball collision with Paddle
         if (CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
             CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
-            state->ball_speed.x *= -1;
+            state->ball_speed.x *= -1.1; // Increse the x speed by 10%
 
             // Calculate relative intersection point (0.0 1.0)
             Rectangle *paddle = CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ? &state->player_paddle : &state->oponent_paddle;
             float relative_y_intersection = (state->ball_position.y - paddle->y) / paddle->height;
 
+            float paddle_speed = (paddle == &state->player_paddle) ? state->player_paddle_speed : state->oponent_paddle_speed;
+
             /* Adjust ball speed based on where it hit
                The middle of the paddle does not change the y of balls trajectory
                Top and bottom of paddle increase y speed */
-            state->ball_speed.y = (relative_y_intersection - 0.5) * 10; // Scale factor of the bounce angle
+
+            state->ball_speed.y = (relative_y_intersection - 0.5) * 10 + paddle_speed * 0.2; // Scale factor of the bounce angle
 
             PlaySound(state->paddle_hit_sound);
         }

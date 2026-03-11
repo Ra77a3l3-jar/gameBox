@@ -13,14 +13,20 @@ typedef enum {
 
 typedef struct {
     GameScreen current_screen;
+
     Rectangle player_paddle;
+    float player_paddle_speed;
     Rectangle oponent_paddle;
+    float oponent_paddle_speed;
+
     Vector2 ball_position;
     Vector2 ball_speed;
+
     int player_score;
     int oponent_score;
     bool game_over;
     bool vs_computer;
+
     Sound paddle_hit_sound;
     Sound score_sound;
     Sound wall_hit_sound;
