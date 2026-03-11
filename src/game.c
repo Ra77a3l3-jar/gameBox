@@ -1,3 +1,4 @@
+#include <math.h>
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -112,13 +113,17 @@ void UpdateGame(GameState *state) {
         // Ball collision with Top and Botom
         if (state->ball_position.y <= 0 || state->ball_position.y >= GetScreenHeight()) {
             state->ball_speed.y *= -1;
+
+            // Randomize a bit the bouncing from colliding with the wall
+            float randomFactor = ((float)GetRandomValue(-30, 30) / 100.0f);
+            state->ball_position.x += randomFactor;
+            
             PlaySound(state->wall_hit_sound);
         }
 
         // Ball collision with Paddle
         if (CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ||
             CheckCollisionCircleRec(state->ball_position, 10, state->oponent_paddle)) {
-            state->ball_speed.x *= -1.1; // Increse the x speed by 10%
 
             // Calculate relative intersection point (0.0 1.0)
             Rectangle *paddle = CheckCollisionCircleRec(state->ball_position, 10, state->player_paddle) ? &state->player_paddle : &state->oponent_paddle;
@@ -131,6 +136,14 @@ void UpdateGame(GameState *state) {
                Top and bottom of paddle increase y speed */
 
             state->ball_speed.y = (relative_y_intersection - 0.5) * 10 + paddle_speed * 0.2; // Scale factor of the bounce angle
+
+            state->ball_speed.x *= -1.0; // Just reverse movement
+
+            if(fabsf(paddle_speed) > 0.1) { // If paddle is moving
+                state->ball_speed.x *= 1.1; // Increse by 10% speed
+            } else { // If paddle is static
+                state->ball_speed.x *= 0.90; // Decrease by 10% speed
+            }
 
             PlaySound(state->paddle_hit_sound);
         }
