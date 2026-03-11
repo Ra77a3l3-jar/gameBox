@@ -24,3 +24,8 @@ pong game written in C using raylib
   - [X] Sound
   - [X] Menu
   - [ ] Polish
+
+- TODO ERRORS
+
+  - [ ] Ball gets stuck between paddle and right or left side wall
+  - [ ] Right side paddle when in PVE mode gets all laggy when has to wait for ball
