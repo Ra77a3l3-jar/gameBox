@@ -2,7 +2,9 @@
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "game.h"
+#include "utils.h"
 
 #define DIFFICULTY_LEVELS 6
 float difficulty_speeds[DIFFICULTY_LEVELS] = {2.3, 2.6, 2.9, 3.2, 3.5, 4.5};
@@ -35,6 +37,13 @@ void InitGame(GameState *state) {
     state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
 
     state->selected_pause = PAUSE_RESUME;
+
+    state->key_player_up = KEY_W;
+    state->key_player_down = KEY_D;
+    state->key_player_up = KEY_UP;
+    state->key_opponent_down = KEY_DOWN;
+    state->waiting_for_key = false;
+    state->rebind_key = 0;
 }
 
 void UpdateGame(GameState *state) {
@@ -58,6 +67,25 @@ void UpdateGame(GameState *state) {
         }
         if(state->ball_position.y > GetScreenHeight()) {
             state->ball_position.y = GetScreenHeight() - 20;
+        }
+    }
+
+    if(state->waiting_for_key) {
+        for(int i = 32; i < 256; i++) {
+            if(IsKeyPressed(i)) {
+                switch(state->rebind_key) {
+                    case 1: state->key_player_up = i; break;
+                    case 2: state->key_player_down = i; break;
+                    case 3: state->key_opponent_up = i; break;
+                    case 4: state->key_opponent_down = i; break;
+                }
+                state->waiting_for_key = false;
+                break;
+            }
+        }
+        // To cancle rebinding
+        if(IsKeyPressed(KEY_ESCAPE)) {
+            state->waiting_for_key = false;
         }
     }
 
@@ -302,6 +330,34 @@ void DrawGame(GameState *state) {
                         state->victory_points = victory_points_options[(i + 1) % VICTORY_POINTS_OPTIONS];
                         break;
                         }
+                    }
+                }
+
+                // Rebinding
+                DrawText("CONTROLS", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2, 280, 30, WHITE);
+
+                const char *controls[4] = {"Player Up", "Player Down", "Opponent Up", "Opponent Down"};
+                int keys[4] = {
+                    state->key_player_up,
+                    state->key_player_down,
+                    state->key_opponent_up,
+                    state->key_opponent_down
+                };
+
+                for(int i = 0; i < 4; i++) {
+                    const char *key_name = GetKeyName(keys[i]);
+                    char buff[50];
+                    snprintf(buff, sizeof(buff), "%s%s", controls[i], key_name);
+
+                    int text_width = MeasureText(buff, 25);
+                    Color color = (state->waiting_for_key && state->rebind_key == i + 1) ? RED : WHITE;
+
+                    DrawText(buff, (GetScreenWidth() - text_width) / 2, 330 + i * 40, 25, color);
+
+                    // Check for mouse click or Enter key to start rebinding
+                    if (!state->waiting_for_key && IsKeyPressed(KEY_ENTER) && GetMouseY() >= 400 + i * 30 && GetMouseY() <= 430 + i * 30) {
+                        state->waiting_for_key = true;
+                        state->rebind_key = i + 1;
                     }
                 }
 

@@ -28,6 +28,13 @@ typedef struct {
     Rectangle oponent_paddle;
     float oponent_paddle_speed;
 
+    int key_player_up;
+    int key_player_down;
+    int key_opponent_up;
+    int key_opponent_down;
+    bool waiting_for_key;
+    int rebind_key; // Current key being rebinded
+
     Vector2 ball_position;
     Vector2 ball_speed;
 
