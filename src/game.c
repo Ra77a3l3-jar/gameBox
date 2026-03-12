@@ -31,6 +31,8 @@ void InitGame(GameState *state) {
     state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
     state->score_sound = LoadSound("assets/audio/pong_score.wav");
     state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
+
+    state->selected_pause = PAUSE_RESUME;
 }
 
 void UpdateGame(GameState *state) {
@@ -68,6 +70,35 @@ void UpdateGame(GameState *state) {
             exit(0);
         }
     }
+
+    if(state->current_screen == PAUSED) {
+        if(IsKeyPressed(KEY_UP)) {
+            state->selected_pause =(state->selected_pause + PAUSE_OPTION_COUT - 1) % PAUSE_OPTION_COUT;
+        } else if(IsKeyPressed(KEY_DOWN)) {
+            state->selected_pause = (state->selected_pause + 1) % PAUSE_OPTION_COUT;
+        } else if(IsKeyPressed(KEY_ENTER)) {
+            switch(state->selected_pause) {
+                case PAUSE_RESUME: {
+                        state->current_screen = GAMEPLAY;
+                        break;
+                }
+                case PAUSE_RESTART: {
+                        InitGame(state);
+                        state->current_screen = GAMEPLAY;
+                        break;      
+                }
+                case PAUSE_SETTINGS: {
+                        state->current_screen = SETTINGS;
+                        break;       
+                }
+                case PAUSE_QUIT: {
+                        state->current_screen = MENU;
+                        InitGame(state);
+                        break;        
+                }
+            }
+        }
+    }
     
     if(state->current_screen == GAMEPLAY) {
         // Player movement
@@ -85,7 +116,7 @@ void UpdateGame(GameState *state) {
         // Computer movement
         if(state->vs_computer) {
             if(state->ball_speed.x > 0) { // React only if ball going towords oponent paddle
-                float error = (rand() % 21) - 10; // Random ofset to simulate imperfection (-10 10)
+                float error = (float)GetRandomValue(-10, 10);
                 float target = state->ball_position.y - state->oponent_paddle.height/2 + error;
                 // Position where the paddle wants to get (aligns paddle with ball centre plus the offset)
 
@@ -210,14 +241,19 @@ void DrawGame(GameState *state) {
                 break;
         }
         case PAUSED: {
-                DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2, 40, WHITE);
+                DrawRectangleRec(state->player_paddle, WHITE);
+                DrawRectangleRec(state->oponent_paddle, WHITE);
+                DrawCircleV(state->ball_position, 10, WHITE);
+                DrawText(TextFormat("%d", state->player_score), GetScreenWidth()/4, 50, 30, WHITE);
+                DrawText(TextFormat("%d", state->oponent_score), 3*GetScreenWidth()/4, 50, 30, WHITE);
 
-                // Draw options
-                DrawText("Press ESC to resume", GetScreenWidth()/2 - MeasureText("Press ESC to resume", 20)/2, GetScreenHeight()/2 + 40, 20, WHITE);
-                DrawText("Press M to return to menu", GetScreenWidth()/2 - MeasureText("Press M to return to menu", 20)/2, GetScreenHeight()/2 + 70, 20, WHITE);
-                if (IsKeyPressed(KEY_M)) {
-                    state->current_screen = MENU;
-                    InitGame(state); // Reset game state
+                DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2 - 100, 40, WHITE);
+
+                // Draw pause menu options
+                char *pause_options[PAUSE_OPTION_COUT] = {"Resume", "Restart", "Settings", "Quit to Menu"};
+                for (int i = 0; i < PAUSE_OPTION_COUT; i++) {
+                    Color color = (i == state->selected_pause) ? RED : WHITE;
+                    DrawText(pause_options[i], GetScreenWidth()/2 - MeasureText(pause_options[i], 30)/2, GetScreenHeight()/2 - 20 + i * 40, 30, color);
                 }
                 break;
         }

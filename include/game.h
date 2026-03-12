@@ -4,6 +4,14 @@
 #include <raylib.h>
 
 typedef enum {
+    PAUSE_RESUME,
+    PAUSE_RESTART,
+    PAUSE_SETTINGS,
+    PAUSE_QUIT,
+    PAUSE_OPTION_COUT
+} PauseOption;
+
+typedef enum {
     MENU,
     GAMEPLAY,
     PAUSED,
@@ -38,6 +46,8 @@ typedef struct {
 
     int victory_timer;
     int victory_player; // 0 Player, 1 Opponent
+
+    PauseOption selected_pause;
 } GameState;
 
 void InitGame(GameState *state);
