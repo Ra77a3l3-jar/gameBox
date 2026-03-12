@@ -12,6 +12,8 @@ int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
 
 void InitGame(GameState *state) {
     state->current_screen = MENU;
+    state->prev_screen = MENU;
+    
     state->vs_computer = false;
 
     state->player_paddle = (Rectangle){20, GetScreenHeight()/2 - 50, 20, 100};
@@ -65,7 +67,7 @@ void UpdateGame(GameState *state) {
         } else if(state->current_screen == PAUSED) {
             state->current_screen = GAMEPLAY;
         } else if(state->current_screen == SETTINGS) {
-            state->current_screen = MENU;
+            state->current_screen = state->prev_screen;
         } else if(state->current_screen == MENU) {
             exit(0);
         }
@@ -83,13 +85,16 @@ void UpdateGame(GameState *state) {
                         break;
                 }
                 case PAUSE_RESTART: {
+                        bool vs_computer = state->vs_computer;
                         InitGame(state);
+                        state->vs_computer = vs_computer;
                         state->current_screen = GAMEPLAY;
                         break;      
                 }
                 case PAUSE_SETTINGS: {
+                        state->prev_screen = PAUSED;
                         state->current_screen = SETTINGS;
-                        break;       
+                        break;
                 }
                 case PAUSE_QUIT: {
                         state->current_screen = MENU;

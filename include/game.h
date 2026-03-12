@@ -21,6 +21,7 @@ typedef enum {
 
 typedef struct {
     GameScreen current_screen;
+    GameScreen prev_screen;
 
     Rectangle player_paddle;
     float player_paddle_speed;
