@@ -26,4 +26,6 @@ void UpdateGameBox(GameBoxState *state);
 void DrawGameBox(GameBoxState *state);
 void CloseGameBox(GameBoxState *state);
 
+void RegisterPongGame(GameBoxState *state);
+
 #endif
