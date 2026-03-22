@@ -70,9 +70,9 @@ typedef struct {
     PauseOption selected_pause;
 } PongGameState;
 
-void PongInit(PongGameState *state);
-void PongUpdate(PongGameState *state);
-void PongDraw(PongGameState *state);
-void PongClose(PongGameState *state);
+void PongInit(void *state);
+void PongUpdate(void *state);
+void PongDraw(void *state);
+void PongClose(void *state);
 
 #endif

@@ -12,7 +12,7 @@ float difficulty_speeds[DIFFICULTY_LEVELS] = {2.3, 2.6, 2.9, 3.2, 3.5, 4.5};
 #define VICTORY_POINTS_OPTIONS 4
 int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
 
-void PongInit(PongGameState *state) {
+void PongInit(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
     
     pong_state->current_screen = MENU;
@@ -51,7 +51,7 @@ void PongInit(PongGameState *state) {
     pong_state->selected_settings_section = SETTINGS_VICTORY_POINTS;
 }
 
-void PongUpdate(PongGameState *state) {
+void PongUpdate(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
 
     if(IsWindowResized()) {
@@ -244,7 +244,7 @@ void PongUpdate(PongGameState *state) {
     }
 }
 
-void PongDraw(PongGameState *state) {
+void PongDraw(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
 
     switch(pong_state->current_screen) {
@@ -478,7 +478,7 @@ void PongDraw(PongGameState *state) {
     }
 }
 
-void PongClose(PongGameState *state) {
+void PongClose(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
     UnloadSound(pong_state->paddle_hit_sound);
     UnloadSound(pong_state->score_sound);

@@ -1,9 +1,9 @@
 #include <raylib.h>
-#include "game.h"
+#include "gamebox.h"
 #include "utils.h"
 
 int main(void) {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pong");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GAMEBOX");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(120);
 
@@ -11,20 +11,20 @@ int main(void) {
 
     SetExitKey(KEY_NULL); // Esc key can be reused
 
-    GameState state = {0};
-    InitGame(&state);
+    GameBoxState state = {0};
+    InitGameBox(&state);
 
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        UpdateGame(&state);
-        DrawGame(&state);
+        UpdateGameBox(&state);
+        DrawGameBox(&state);
 
         EndDrawing();
     }
 
-    CloseGame(&state);
+    CloseGameBox(&state);
     CloseAudioDevice();
     CloseWindow();
 }
