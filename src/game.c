@@ -39,8 +39,8 @@ void InitGame(GameState *state) {
     state->selected_pause = PAUSE_RESUME;
 
     state->key_player_up = KEY_W;
-    state->key_player_down = KEY_D;
-    state->key_player_up = KEY_UP;
+    state->key_player_down = KEY_S;
+    state->key_opponent_up = KEY_UP;
     state->key_opponent_down = KEY_DOWN;
     state->waiting_for_key = false;
     state->rebind_key = 0;
@@ -141,10 +141,10 @@ void UpdateGame(GameState *state) {
         float prev_player_y = state->player_paddle.y;
         float prev_oponent_y = state->oponent_paddle.y;
         
-        if(IsKeyDown(KEY_W) && state->player_paddle.y > 0) {
+        if(IsKeyDown(state->key_player_up) && state->player_paddle.y > 0) {
             state->player_paddle.y -= 7;
         }
-        if(IsKeyDown(KEY_D) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) {
+        if(IsKeyDown(state->key_player_down) && state->player_paddle.y + state->player_paddle.height < GetScreenHeight()) {
             state->player_paddle.y += 7;
         }
         state->player_paddle_speed = state->player_paddle.y - prev_player_y;
@@ -164,10 +164,10 @@ void UpdateGame(GameState *state) {
                 }
             }
         } else {
-            if (IsKeyDown(KEY_UP) && state->oponent_paddle.y > 0) {
+            if (IsKeyDown(state->key_opponent_up) && state->oponent_paddle.y > 0) {
                 state->oponent_paddle.y -= 7;
             }
-            if (IsKeyDown(KEY_DOWN) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight()) {
+            if (IsKeyDown(state->key_opponent_down) && state->oponent_paddle.y + state->oponent_paddle.height < GetScreenHeight()) {
                 state->oponent_paddle.y += 7;
             }
         }
