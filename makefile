@@ -13,7 +13,7 @@ BIN_DIR = bin
 TARGET = $(BIN_DIR)/game
 
 # Source and object files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/games/pong/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Default target
@@ -33,6 +33,7 @@ $(TARGET): $(OBJS) | $(BIN_DIR)
 
 # Compile source files to object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Run the executable
