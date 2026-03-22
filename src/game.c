@@ -44,6 +44,9 @@ void InitGame(GameState *state) {
     state->key_opponent_down = KEY_DOWN;
     state->waiting_for_key = false;
     state->rebind_key = 0;
+    state->selected_key_index = 0;
+
+    state->selected_settings_section = SETTINGS_VICTORY_POINTS;
 }
 
 void UpdateGame(GameState *state) {
@@ -291,51 +294,119 @@ void DrawGame(GameState *state) {
                 break;
         }
         case SETTINGS: {
-                DrawText("SETTINGS", GetScreenWidth()/2 - MeasureText("SETTINGS", 40)/2, 100, 40, WHITE);
+                DrawText("SETTINGS", GetScreenWidth()/2 - MeasureText("SETTINGS", 40)/2, 50, 40, WHITE);
 
-                // Difficulty slider
-                DrawText("Difficulty", 200, 200, 25, WHITE);
-                for(int i = 0; i < DIFFICULTY_LEVELS; i++) {
-                    Color color = (i == state->difficulty_level) ? GREEN : GRAY;
-                    DrawRectangle(400 + i * 50, 200, 20, 20, color);
-                    DrawText(TextFormat("%d", i + 1), 400 + i * 50, 230, 15, WHITE);
-                }
-                if(IsKeyPressed(KEY_LEFT) && state->difficulty_level > 0) {
-                    state->difficulty_level--;
-                    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
-                }
-                if(IsKeyPressed(KEY_RIGHT) && state->difficulty_level < DIFFICULTY_LEVELS - 1) {
-                    state->difficulty_level++;
-                    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+                int start_y = 150;
+                int section_spacing = 120;
+
+                if(!state->waiting_for_key) {
+                    // UP/DOWN: Navigate between sections
+                    if(IsKeyPressed(KEY_UP)) {
+                        state->selected_settings_section = (state->selected_settings_section + SETTINGS_SECTION_COUNT - 1) % SETTINGS_SECTION_COUNT;
+                        if(state->selected_settings_section == SETTINGS_CONTROLS) {
+                            state->selected_key_index = 0; // Reset to first key when entering controls
+                        }
+                    }
+                    if(IsKeyPressed(KEY_DOWN)) {
+                        state->selected_settings_section = (state->selected_settings_section + 1) % SETTINGS_SECTION_COUNT;
+                        if(state->selected_settings_section == SETTINGS_CONTROLS) {
+                            state->selected_key_index = 0; // Reset to first key when entering controls
+                        }
+                    }
+
+                    // LEFT/RIGHT: Modify values or navigate keys
+                    if(state->selected_settings_section == SETTINGS_VICTORY_POINTS) {
+                        if(IsKeyPressed(KEY_LEFT)) {
+                            for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
+                                if(victory_points_options[i] == state->victory_points) {
+                                    state->victory_points = victory_points_options[(i + VICTORY_POINTS_OPTIONS - 1) % VICTORY_POINTS_OPTIONS];
+                                    break;
+                                }
+                            }
+                        }
+                        if(IsKeyPressed(KEY_RIGHT)) {
+                            for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
+                                if(victory_points_options[i] == state->victory_points) {
+                                    state->victory_points = victory_points_options[(i + 1) % VICTORY_POINTS_OPTIONS];
+                                    break;
+                                }
+                            }
+                        }
+                    } else if(state->selected_settings_section == SETTINGS_DIFFICULTY) {
+                        if(IsKeyPressed(KEY_LEFT) && state->difficulty_level > 0) {
+                            state->difficulty_level--;
+                            state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+                        }
+                        if(IsKeyPressed(KEY_RIGHT) && state->difficulty_level < DIFFICULTY_LEVELS - 1) {
+                            state->difficulty_level++;
+                            state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+                        }
+                    } else if(state->selected_settings_section == SETTINGS_CONTROLS) {
+                        if(IsKeyPressed(KEY_LEFT)) {
+                            state->selected_key_index = (state->selected_key_index + 3) % 4;
+                        }
+                        if(IsKeyPressed(KEY_RIGHT)) {
+                            state->selected_key_index = (state->selected_key_index + 1) % 4;
+                        }
+                        // ENTER: Start rebinding selected key
+                        if(IsKeyPressed(KEY_ENTER)) {
+                            state->waiting_for_key = true;
+                            state->rebind_key = state->selected_key_index + 1;
+                        }
+                    }
                 }
 
-                // Victory point slider
-                DrawText("Victory Points", 200, 300, 25, WHITE);
+                // Point section
+                int vp_y = start_y;
+                Color vp_title_color = (state->selected_settings_section == SETTINGS_VICTORY_POINTS) ? YELLOW : WHITE;
+                DrawText("VICTORY POINTS", GetScreenWidth()/2 - MeasureText("VICTORY POINTS", 30)/2, vp_y, 30, vp_title_color);
+                
+                // Draw selection indicator
+                if(state->selected_settings_section == SETTINGS_VICTORY_POINTS) {
+                    DrawText(">", GetScreenWidth()/2 - MeasureText("VICTORY POINTS", 30)/2 - 30, vp_y, 30, YELLOW);
+                }
+
+                int vp_options_y = vp_y + 50;
+                int total_width = VICTORY_POINTS_OPTIONS * 60 - 10;
+                int start_x = GetScreenWidth()/2 - total_width/2;
+                
                 for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
-                    Color color = (victory_points_options[i] == state->victory_points) ? RED : GRAY;
-                    DrawRectangle(400 + i * 50, 300, 20, 20, color);
-                    DrawText(TextFormat("%d", victory_points_options[i]), 400 + i * 50, 330, 15, WHITE);
-                }
-                if(IsKeyPressed(KEY_UP)) {
-                    for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
-                        if(victory_points_options[i] == state->victory_points) {
-                            state->victory_points = victory_points_options[(i + VICTORY_POINTS_OPTIONS - 1) % VICTORY_POINTS_OPTIONS];
-                            break;
-                        }
-                    }
-                }
-                if(IsKeyPressed(KEY_DOWN)) {
-                    for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
-                        if(victory_points_options[i] == state->victory_points) {
-                        state->victory_points = victory_points_options[(i + 1) % VICTORY_POINTS_OPTIONS];
-                        break;
-                        }
-                    }
+                    Color color = (victory_points_options[i] == state->victory_points) ? GREEN : GRAY;
+                    DrawRectangle(start_x + i * 60, vp_options_y, 40, 40, color);
+                    DrawText(TextFormat("%d", victory_points_options[i]), start_x + i * 60 + 10, vp_options_y + 10, 20, BLACK);
                 }
 
-                // Rebinding
-                DrawText("CONTROLS", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2, 280, 30, WHITE);
+                // Dificulty section
+                int diff_y = start_y + section_spacing;
+                Color diff_title_color = (state->selected_settings_section == SETTINGS_DIFFICULTY) ? YELLOW : WHITE;
+                DrawText("DIFFICULTY", GetScreenWidth()/2 - MeasureText("DIFFICULTY", 30)/2, diff_y, 30, diff_title_color);
+                
+                // Selection indicator
+                if(state->selected_settings_section == SETTINGS_DIFFICULTY) {
+                    DrawText(">", GetScreenWidth()/2 - MeasureText("DIFFICULTY", 30)/2 - 30, diff_y, 30, YELLOW);
+                }
 
+                int diff_options_y = diff_y + 50;
+                int diff_total_width = DIFFICULTY_LEVELS * 50 - 10;
+                int diff_start_x = GetScreenWidth()/2 - diff_total_width/2;
+                
+                for(int i = 0; i < DIFFICULTY_LEVELS; i++) {
+                    Color color = (i == state->difficulty_level) ? RED : GRAY;
+                    DrawRectangle(diff_start_x + i * 50, diff_options_y, 30, 30, color);
+                    DrawText(TextFormat("%d", i + 1), diff_start_x + i * 50 + 8, diff_options_y + 7, 15, WHITE);
+                }
+
+                // === CONTROLS SECTION ===
+                int controls_y = start_y + section_spacing * 2;
+                Color controls_title_color = (state->selected_settings_section == SETTINGS_CONTROLS) ? YELLOW : WHITE;
+                DrawText("CONTROLS", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2, controls_y, 30, controls_title_color);
+                
+                // Draw selection indicator
+                if(state->selected_settings_section == SETTINGS_CONTROLS) {
+                    DrawText(">", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2 - 30, controls_y, 30, YELLOW);
+                }
+                
+                // Controls
                 const char *controls[4] = {"Player Up", "Player Down", "Opponent Up", "Opponent Down"};
                 int keys[4] = {
                     state->key_player_up,
@@ -344,24 +415,45 @@ void DrawGame(GameState *state) {
                     state->key_opponent_down
                 };
 
+                int controls_options_y = controls_y + 45;
                 for(int i = 0; i < 4; i++) {
                     const char *key_name = GetKeyName(keys[i]);
-                    char buff[50];
-                    snprintf(buff, sizeof(buff), "%s%s", controls[i], key_name);
+                    char buff[64];
+                    snprintf(buff, sizeof(buff), "%s: %s", controls[i], key_name);
 
-                    int text_width = MeasureText(buff, 25);
-                    Color color = (state->waiting_for_key && state->rebind_key == i + 1) ? RED : WHITE;
+                    int text_width = MeasureText(buff, 20);
+                    int x_pos = (GetScreenWidth() - text_width) / 2;
+                    
+                    Color color = WHITE;
+                    if(state->waiting_for_key && state->rebind_key == i + 1) {
+                        color = RED;
+                    } else if(state->selected_settings_section == SETTINGS_CONTROLS && state->selected_key_index == i) {
+                        color = YELLOW;
+                    }
 
-                    DrawText(buff, (GetScreenWidth() - text_width) / 2, 330 + i * 40, 25, color);
+                    DrawText(buff, x_pos, controls_options_y + i * 35, 20, color);
 
-                    // Check for mouse click or Enter key to start rebinding
-                    if (!state->waiting_for_key && IsKeyPressed(KEY_ENTER) && GetMouseY() >= 400 + i * 30 && GetMouseY() <= 430 + i * 30) {
-                        state->waiting_for_key = true;
-                        state->rebind_key = i + 1;
+                    // Draw highlight box for selected key
+                    if(state->selected_settings_section == SETTINGS_CONTROLS && state->selected_key_index == i && !state->waiting_for_key) {
+                        DrawRectangleLines(x_pos - 5, controls_options_y + i * 35 - 5, text_width + 10, 30, YELLOW);
+                    }
+
+                    // Draw highlight for rebinding
+                    if(state->waiting_for_key && state->rebind_key == i + 1) {
+                        DrawRectangle(x_pos - 10, controls_options_y + i * 35 - 5, text_width + 20, 30, ColorAlpha(RED, 0.3));
                     }
                 }
 
-                DrawText("Press ESC to return to menu", GetScreenWidth()/2 - MeasureText("Press ESC to return to menu", 20)/2, 500, 20, WHITE);
+                int instructions_y = GetScreenHeight() - 120;
+                if(!state->waiting_for_key) {
+                    DrawText("UP/DOWN: Navigate sections", GetScreenWidth()/2 - MeasureText("UP/DOWN: Navigate sections", 18)/2, instructions_y, 18, GRAY);
+                    DrawText("LEFT/RIGHT: Change values or select key", GetScreenWidth()/2 - MeasureText("LEFT/RIGHT: Change values or select key", 18)/2, instructions_y + 25, 18, GRAY);
+                    DrawText("ENTER: Rebind selected key", GetScreenWidth()/2 - MeasureText("ENTER: Rebind selected key", 18)/2, instructions_y + 50, 18, GRAY);
+                } else {
+                    DrawText("PRESS A KEY TO BIND (ESC TO CANCEL)", GetScreenWidth()/2 - MeasureText("PRESS A KEY TO BIND (ESC TO CANCEL)", 25)/2, instructions_y + 20, 25, YELLOW);
+                }
+
+                DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 18)/2, GetScreenHeight() - 30, 18, WHITE);
                 break;                                
         }
         case VICTORY: {

@@ -12,6 +12,13 @@ typedef enum {
 } PauseOption;
 
 typedef enum {
+    SETTINGS_VICTORY_POINTS,
+    SETTINGS_DIFFICULTY,
+    SETTINGS_CONTROLS,
+    SETTINGS_SECTION_COUNT
+} SettingsSection;
+
+typedef enum {
     MENU,
     GAMEPLAY,
     PAUSED,
@@ -34,6 +41,10 @@ typedef struct {
     int key_opponent_down;
     bool waiting_for_key;
     int rebind_key; // Current key being rebinded
+    int selected_key_index; // For navigating through keys with left/right
+
+    // Settings navigation
+    SettingsSection selected_settings_section;
 
     Vector2 ball_position;
     Vector2 ball_speed;
