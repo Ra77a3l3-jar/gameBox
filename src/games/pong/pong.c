@@ -1,9 +1,8 @@
-#include <math.h>
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "game.h"
+#include "pong.h"
 #include "utils.h"
 
 #define DIFFICULTY_LEVELS 6
@@ -12,44 +11,47 @@ float difficulty_speeds[DIFFICULTY_LEVELS] = {2.3, 2.6, 2.9, 3.2, 3.5, 4.5};
 #define VICTORY_POINTS_OPTIONS 4
 int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
 
-void InitGame(GameState *state) {
-    state->current_screen = MENU;
-    state->prev_screen = MENU;
+void PongInit(PongGameState *state) {
+    PongGameState *pong_state = (PongGameState*)state;
     
-    state->vs_computer = false;
-
-    state->player_paddle = (Rectangle){20, GetScreenHeight()/2 - 50, 20, 100};
-    state->oponent_paddle = (Rectangle){GetScreenWidth() - 40, GetScreenHeight()/2 - 50, 20, 100};
-
-    state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
-    state->ball_speed = (Vector2){5, 3};
+    pong_state->current_screen = MENU;
+    pong_state->prev_screen = MENU;
     
-    state->player_score = 0;
-    state->oponent_score = 0;
-    state->game_over = false;
+    pong_state->vs_computer = false;
 
-    state->difficulty_level = 2;
-    state->victory_points = 10;
-    state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
+    pong_state->player_paddle = (Rectangle){20, GetScreenHeight()/2 - 50, 20, 100};
+    pong_state->oponent_paddle = (Rectangle){GetScreenWidth() - 40, GetScreenHeight()/2 - 50, 20, 100};
 
-    state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
-    state->score_sound = LoadSound("assets/audio/pong_score.wav");
-    state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
+    pong_state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
+    pong_state->ball_speed = (Vector2){5, 3};
+    
+    pong_state->player_score = 0;
+    pong_state->oponent_score = 0;
+    pong_state->game_over = false;
 
-    state->selected_pause = PAUSE_RESUME;
+    pong_state->difficulty_level = 2;
+    pong_state->victory_points = 10;
+    pong_state->computer_movement_speed = difficulty_speeds[state->difficulty_level];
 
-    state->key_player_up = KEY_W;
-    state->key_player_down = KEY_S;
-    state->key_opponent_up = KEY_UP;
-    state->key_opponent_down = KEY_DOWN;
-    state->waiting_for_key = false;
-    state->rebind_key = 0;
-    state->selected_key_index = 0;
+    pong_state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
+    pong_state->score_sound = LoadSound("assets/audio/pong_score.wav");
+    pong_state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
 
-    state->selected_settings_section = SETTINGS_VICTORY_POINTS;
+    pong_state->selected_pause = PAUSE_RESUME;
+
+    pong_state->key_player_up = KEY_W;
+    pong_state->key_player_down = KEY_S;
+    pong_state->key_opponent_up = KEY_UP;
+    pong_state->key_opponent_down = KEY_DOWN;
+    pong_state->waiting_for_key = false;
+    pong_state->rebind_key = 0;
+    pong_state->selected_key_index = 0;
+
+    pong_state->selected_settings_section = SETTINGS_VICTORY_POINTS;
 }
 
-void UpdateGame(GameState *state) {
+void PongUpdate(PongGameState *state) {
+    PongGameState *pong_state = (PongGameState*)state;
 
     if(IsWindowResized()) {
         // Keep player paddle on left side (x stays at 20)
@@ -117,7 +119,7 @@ void UpdateGame(GameState *state) {
                 }
                 case PAUSE_RESTART: {
                         bool vs_computer = state->vs_computer;
-                        InitGame(state);
+                        PongInit(state);
                         state->vs_computer = vs_computer;
                         state->current_screen = GAMEPLAY;
                         break;      
@@ -129,7 +131,7 @@ void UpdateGame(GameState *state) {
                 }
                 case PAUSE_QUIT: {
                         state->current_screen = MENU;
-                        InitGame(state);
+                        PongInit(state);
                         break;        
                 }
             }
@@ -241,7 +243,9 @@ void UpdateGame(GameState *state) {
     }
 }
 
-void DrawGame(GameState *state) {
+void PongDraw(PongGameState *state) {
+    PongGameState *pong_state = (PongGameState*)state;
+
     switch(state->current_screen) {
         case MENU: {
                 DrawText("PONG", GetScreenWidth()/2 - MeasureText("PONG", 60)/2, GetScreenHeight()/4, 60, WHITE);
@@ -466,14 +470,14 @@ void DrawGame(GameState *state) {
                 state->victory_timer--;
                 if(state->victory_timer <= 0 || IsKeyPressed(KEY_M)) {
                     state->current_screen = MENU;
-                    InitGame(state);
+                    PongInit(state);
                 }
                 break;        
         }
     }
 }
 
-void CloseGame(GameState *state) {
+void PongClose(PongGameState *state) {
     UnloadSound(state->paddle_hit_sound);
     UnloadSound(state->score_sound);
     UnloadSound(state->wall_hit_sound);

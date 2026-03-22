@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include "gamebox.h"
+#include "pong.h"
 
 void InitGameBox(GameBoxState *state) {
     state->current_screen = GAMEBOX_MENU;
@@ -64,4 +65,13 @@ void CloseGameBox(GameBoxState *state) {
         state->game_close(state->game_state);
         free(state->game_state);
     }
+}
+
+void RegisterPongGame(GameBoxState *state) {
+    state->game_state = malloc(sizeof(PongGameState));
+
+    state->game_init = PongInit;
+    state->game_update = PongUpdate;
+    state->game_draw = PongDraw;
+    state->game_close = PongClose;
 }

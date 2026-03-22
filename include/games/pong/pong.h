@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <raylib.h>
+#include "gamebox.h"
 
 typedef enum {
     PAUSE_RESUME,
@@ -67,11 +68,11 @@ typedef struct {
     int victory_player; // 0 Player, 1 Opponent
 
     PauseOption selected_pause;
-} GameState;
+} PongGameState;
 
-void InitGame(GameState *state);
-void UpdateGame(GameState *state);
-void DrawGame(GameState *state);
-void CloseGame(GameState *state);
+void PongInit(PongGameState *state);
+void PongUpdate(PongGameState *state);
+void PongDraw(PongGameState *state);
+void PongClose(PongGameState *state);
 
 #endif
