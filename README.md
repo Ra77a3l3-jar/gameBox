@@ -1,6 +1,5 @@
-# Pong
-pong game written in C using raylib
-
+# Gamebox
+A collection of games made in C with Raylib
 
 ## Roadmap
 
@@ -25,7 +24,11 @@ pong game written in C using raylib
   - [X] Menu
   - [ ] Polish
 
-- TODO ERRORS
+- Next Phase
 
-  - [ ] Ball gets stuck between paddle and right or left side wall
-  - [ ] Right side paddle when in PVE mode gets all laggy when has to wait for ball
+  [ ] Game box
+   - [ ] Pong
+   - [ ] Breakout
+   - [ ] Sneak
+   - [ ] Space Invader
+  
