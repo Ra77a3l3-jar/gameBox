@@ -40,3 +40,28 @@ void UpdateGameBox(GameBoxState *state) {
         }
     }
 }
+
+void DrawGameBox(GameBoxState *state) {
+    if(state->current_screen == GAMEBOX_MENU) {
+        ClearBackground(BLACK);
+
+        DrawText("GAMEBOX", GetScreenWidth()/2 - MeasureText("GAMEBOX", 80)/2, 100, 80, ORANGE);
+
+        // Game selection
+        DrawText("PONG", GetScreenWidth()/2 - MeasureText("PONG", 50)/2, 300, 50, WHITE);
+        DrawText("Press ENTER to play", GetScreenWidth()/2 - MeasureText("Press ENTER to play", 25)/2, 400, 25, GRAY);
+        DrawText("More games coming soon...", GetScreenWidth()/2 - MeasureText("More games coming soon...", 20)/2, 450, 20, GRAY);
+    } else {
+        // Draw current game
+        if(state->game_draw) {
+            state->game_draw(state->game_state);
+        }
+    }
+}
+
+void CloseGameBox(GameBoxState *state) {
+    if(state->game_close && state->game_state) {
+        state->game_close(state->game_state);
+        free(state->game_state);
+    }
+}
