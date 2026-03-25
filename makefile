@@ -1,11 +1,11 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -I./include -I./include/games/pong
+CFLAGS = -Wall -Wextra -std=c99 -I./include -I./include/games/pong -I./include/games/breakout
 LDFLAGS = -lraylib -lm -lpthread -ldl -lrt -lX11
 
 # Directories
 SRC_DIR = src
-INC_DIR = include include/games include/games/pong
+INC_DIR = include include/games include/games/pong include/games/breakout
 BUILD_DIR = build
 BIN_DIR = bin
 
