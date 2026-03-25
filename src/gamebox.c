@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include "gamebox.h"
 #include "pong.h"
@@ -28,8 +29,19 @@ void UpdateGameBox(GameBoxState *state) {
     } else {
         // Updating currenty running game
         if(state->game_update) {
+            bool should_continue = state->game_update(state->game_state);
+            if(!should_continue) {
+                if(state->game_close) {
+                    state->game_close(state->game_state);
+                }
+                free(state->game_state);
+                state->game_state = NULL;
+                state->current_screen = GAMEBOX_MENU;
+                return;
+            }
+            
             state->game_update(state->game_state);
-        }
+        }        
 
         if(IsKeyPressed(KEY_ESCAPE)) {
             if(state->game_close) {
@@ -70,8 +82,8 @@ void CloseGameBox(GameBoxState *state) {
 void RegisterPongGame(GameBoxState *state) {
     state->game_state = malloc(sizeof(PongGameState));
 
-    state->game_init = PongInit;
-    state->game_update = PongUpdate;
-    state->game_draw = PongDraw;
-    state->game_close = PongClose;
+    state->game_init = (GameInitFunc)PongInit;
+    state->game_update = (GameUpdateFunc)PongUpdate;
+    state->game_draw = (GameDrawFunc)PongDraw;
+    state->game_close = (GameCloseFunc)PongClose;
 }

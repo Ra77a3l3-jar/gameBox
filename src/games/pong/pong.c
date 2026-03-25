@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "pong.h"
@@ -15,8 +14,8 @@ int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
 void PongInit(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
     
-    pong_state->current_screen = MENU;
-    pong_state->prev_screen = MENU;
+    pong_state->current_screen = PONG_MENU;
+    pong_state->prev_screen = PONG_MENU;
     
     pong_state->vs_computer = false;
 
@@ -34,9 +33,9 @@ void PongInit(void *state) {
     pong_state->victory_points = 10;
     pong_state->computer_movement_speed = difficulty_speeds[pong_state->difficulty_level];
 
-    pong_state->paddle_hit_sound = LoadSound("assets/audio/pong_paddle_hit.wav");
-    pong_state->score_sound = LoadSound("assets/audio/pong_score.wav");
-    pong_state->wall_hit_sound = LoadSound("assets/audio/pong_wall_hit.wav");
+    pong_state->paddle_hit_sound = LoadSound("assets/audio/pong/pong_paddle_hit.wav");
+    pong_state->score_sound = LoadSound("assets/audio/pong/pong_score.wav");
+    pong_state->wall_hit_sound = LoadSound("assets/audio/pong/pong_wall_hit.wav");
 
     pong_state->selected_pause = PAUSE_RESUME;
 
@@ -51,7 +50,7 @@ void PongInit(void *state) {
     pong_state->selected_settings_section = SETTINGS_VICTORY_POINTS;
 }
 
-void PongUpdate(void *state) {
+bool PongUpdate(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
 
     if(IsWindowResized()) {
@@ -96,18 +95,19 @@ void PongUpdate(void *state) {
     }
 
     if(IsKeyPressed(KEY_ESCAPE)) {
-        if(pong_state->current_screen == GAMEPLAY) {
-            pong_state->current_screen = PAUSED;
-        } else if(pong_state->current_screen == PAUSED) {
-            pong_state->current_screen = GAMEPLAY;
-        } else if(pong_state->current_screen == SETTINGS) {
+        if(pong_state->current_screen == PONG_GAMEPLAY) {
+            pong_state->current_screen = PONG_PAUSED;
+        } else if(pong_state->current_screen == PONG_PAUSED) {
+            pong_state->current_screen = PONG_GAMEPLAY;
+        } else if(pong_state->current_screen == PONG_SETTINGS) {
             pong_state->current_screen = pong_state->prev_screen;
-        } else if(pong_state->current_screen == MENU) {
-            exit(0);
+        } else {
+            // Menu and Victory screen
+            return false;
         }
     }
 
-    if(pong_state->current_screen == PAUSED) {
+    if(pong_state->current_screen == PONG_PAUSED) {
         if(IsKeyPressed(KEY_UP)) {
             pong_state->selected_pause =(pong_state->selected_pause + PAUSE_OPTION_COUT - 1) % PAUSE_OPTION_COUT;
         } else if(IsKeyPressed(KEY_DOWN)) {
@@ -115,23 +115,23 @@ void PongUpdate(void *state) {
         } else if(IsKeyPressed(KEY_ENTER)) {
             switch(pong_state->selected_pause) {
                 case PAUSE_RESUME: {
-                        pong_state->current_screen = GAMEPLAY;
+                        pong_state->current_screen = PONG_GAMEPLAY;
                         break;
                 }
                 case PAUSE_RESTART: {
                         bool vs_computer = pong_state->vs_computer;
                         PongInit(state);
                         pong_state->vs_computer = vs_computer;
-                        pong_state->current_screen = GAMEPLAY;
+                        pong_state->current_screen = PONG_GAMEPLAY;
                         break;      
                 }
                 case PAUSE_SETTINGS: {
-                        pong_state->prev_screen = PAUSED;
-                        pong_state->current_screen = SETTINGS;
+                        pong_state->prev_screen = PONG_PAUSED;
+                        pong_state->current_screen = PONG_SETTINGS;
                         break;
                 }
                 case PAUSE_QUIT: {
-                        pong_state->current_screen = MENU;
+                        pong_state->current_screen = PONG_MENU;
                         PongInit(state);
                         break;        
                 }
@@ -139,7 +139,7 @@ void PongUpdate(void *state) {
         }
     }
     
-    if(pong_state->current_screen == GAMEPLAY) {
+    if(pong_state->current_screen == PONG_GAMEPLAY) {
         // Player movement
         float prev_player_y = pong_state->player_paddle.y;
         float prev_oponent_y = pong_state->oponent_paddle.y;
@@ -235,20 +235,21 @@ void PongUpdate(void *state) {
         if(pong_state->player_score >= pong_state->victory_points) {
             pong_state->victory_player = 0;
             pong_state->victory_timer = 240; // 2s at 120fps
-            pong_state->current_screen = VICTORY;
+            pong_state->current_screen = PONG_VICTORY;
         } else if(pong_state->oponent_score >= pong_state->victory_points) {
             pong_state->victory_player = 1;
             pong_state->victory_timer = 240;
-            pong_state->current_screen = VICTORY;
+            pong_state->current_screen = PONG_VICTORY;
         }
     }
+    return true;
 }
 
 void PongDraw(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
 
     switch(pong_state->current_screen) {
-        case MENU: {
+        case PONG_MENU: {
                 DrawText("PONG", GetScreenWidth()/2 - MeasureText("PONG", 60)/2, GetScreenHeight()/4, 60, WHITE);
 
                 // Draw options
@@ -258,16 +259,16 @@ void PongDraw(void *state) {
                 DrawText("Press ESC to Exit", GetScreenWidth()/2 - MeasureText("Press ESC to Exit", 30)/2, GetScreenHeight()/2 + 120, 30, WHITE);
                 if (IsKeyPressed(KEY_ONE)) {
                     pong_state->vs_computer = false;
-                    pong_state->current_screen = GAMEPLAY;
+                    pong_state->current_screen = PONG_GAMEPLAY;
                 } else if (IsKeyPressed(KEY_TWO)) {
                     pong_state->vs_computer = true;
-                    pong_state->current_screen = GAMEPLAY;
+                    pong_state->current_screen = PONG_GAMEPLAY;
                 } else if (IsKeyPressed(KEY_S)) {
-                    pong_state->current_screen = SETTINGS;
+                    pong_state->current_screen = PONG_SETTINGS;
                 }
                 break;
         }
-        case GAMEPLAY: {
+        case PONG_GAMEPLAY: {
                 // Player paddle texture
                 DrawRectangleRec(pong_state->player_paddle, WHITE);
                 DrawRectangleRec(pong_state->oponent_paddle, WHITE);
@@ -281,7 +282,7 @@ void PongDraw(void *state) {
                 DrawText(TextFormat("%d", GetFPS()), 2*GetScreenWidth()/4, 50, 30, WHITE);
                 break;
         }
-        case PAUSED: {
+        case PONG_PAUSED: {
                 DrawRectangleRec(pong_state->player_paddle, WHITE);
                 DrawRectangleRec(pong_state->oponent_paddle, WHITE);
                 DrawCircleV(pong_state->ball_position, 10, WHITE);
@@ -298,7 +299,7 @@ void PongDraw(void *state) {
                 }
                 break;
         }
-        case SETTINGS: {
+        case PONG_SETTINGS: {
                 DrawText("SETTINGS", GetScreenWidth()/2 - MeasureText("SETTINGS", 40)/2, 50, 40, WHITE);
 
                 int start_y = 150;
@@ -461,7 +462,7 @@ void PongDraw(void *state) {
                 DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 18)/2, GetScreenHeight() - 30, 18, WHITE);
                 break;                                
         }
-        case VICTORY: {
+        case PONG_VICTORY: {
                 const char *winner = (pong_state->victory_player == 0) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
 
                 DrawText(winner, GetScreenWidth()/2 - MeasureText(winner, 50)/2, GetScreenHeight()/2 - 50, 50, GREEN);
@@ -470,7 +471,7 @@ void PongDraw(void *state) {
 
                 pong_state->victory_timer--;
                 if(pong_state->victory_timer <= 0 || IsKeyPressed(KEY_M)) {
-                    pong_state->current_screen = MENU;
+                    pong_state->current_screen = PONG_MENU;
                     PongInit(state);
                 }
                 break;        

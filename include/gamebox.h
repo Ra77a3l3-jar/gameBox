@@ -4,6 +4,11 @@
 #include <raylib.h>
 #include <stdbool.h>
 
+typedef void (*GameInitFunc)(void*);
+typedef bool (*GameUpdateFunc)(void*); // False to return to home
+typedef void (*GameDrawFunc)(void*);
+typedef void (*GameCloseFunc)(void*);
+
 typedef enum {
     GAMEBOX_MENU,
     GAMEBOX_PONG
@@ -15,10 +20,10 @@ typedef struct {
 
     void *game_state; // Current game
 
-    void (*game_init)(void *);
-    void (*game_update)(void *);
-    void (*game_draw)(void *);
-    void (*game_close)(void *);
+    GameInitFunc game_init;
+    GameUpdateFunc game_update;
+    GameDrawFunc game_draw;
+    GameCloseFunc game_close;
 } GameBoxState;
 
 void InitGameBox(GameBoxState *state);

@@ -20,11 +20,11 @@ typedef enum {
 } SettingsSection;
 
 typedef enum {
-    MENU,
-    GAMEPLAY,
-    PAUSED,
-    SETTINGS,
-    VICTORY
+    PONG_MENU,
+    PONG_GAMEPLAY,
+    PONG_PAUSED,
+    PONG_SETTINGS,
+    PONG_VICTORY
 } GameScreen;
 
 typedef struct {
@@ -71,7 +71,7 @@ typedef struct {
 } PongGameState;
 
 void PongInit(void *state);
-void PongUpdate(void *state);
+bool PongUpdate(void *state);
 void PongDraw(void *state);
 void PongClose(void *state);
 
