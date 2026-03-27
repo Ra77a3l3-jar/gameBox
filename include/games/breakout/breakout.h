@@ -42,6 +42,7 @@ typedef struct {
 
     int score;
     int level;
+    int lives;
     bool game_over;
     bool victory;
 

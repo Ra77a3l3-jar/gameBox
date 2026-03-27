@@ -10,6 +10,7 @@ void BreakoutInit(BreakoutGameState *state) {
 
     breakout_state->score = 0;
     breakout_state->level = 1;
+    breakout_state->lives = 3;
     breakout_state->game_over = false;
     breakout_state->victory = false;
 
@@ -64,24 +65,87 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         } else if(breakout_state->current_screen == BREAKOUT_PAUSED) {
             breakout_state->current_screen = breakout_state->prev_screen;
         }
+    }
 
-        if(breakout_state->current_screen == BREAKOUT_GAMEPLAY) {
-            // Paddle movement
-            if(IsKeyPressed(breakout_state->key_left) && breakout_state->paddle.x > 0) {
-                breakout_state->paddle.x -= breakout_state->paddle_speed;
+    if(breakout_state->current_screen == BREAKOUT_GAMEPLAY) {
+        // Paddle movement
+        if(IsKeyPressed(breakout_state->key_left) && breakout_state->paddle.x > 0) {
+            breakout_state->paddle.x -= breakout_state->paddle_speed;
+        }
+        if(IsKeyPressed(breakout_state->key_right) && breakout_state->paddle.x + breakout_state->paddle_width < GetScreenWidth()) {
+            breakout_state->paddle.x += breakout_state->paddle_speed;
+        }
+
+        // Ball movement
+        if(breakout_state->ball_active) {
+            breakout_state->ball_position.x += breakout_state->ball_speed.x;
+            breakout_state->ball_position.y += breakout_state->ball_speed.y;
+
+            // Ball collision wall
+            if(breakout_state->ball_position.x - breakout_state->ball_rad <= 0 ||
+                breakout_state->ball_position.x + breakout_state->ball_rad >= GetScreenWidth()) {
+                breakout_state->ball_speed.x *= -1;
             }
-            if(IsKeyPressed(breakout_state->key_right) && breakout_state->paddle.x + breakout_state->paddle_width < GetScreenWidth()) {
-                breakout_state->paddle.x += breakout_state->paddle_speed;
+
+            if(breakout_state->ball_position.y - breakout_state->ball_rad <= 0) {
+                breakout_state->ball_speed.y *= -1;
             }
 
-            // Ball movement
-            if(breakout_state->ball_active) {
-                breakout_state->ball_position.x += breakout_state->ball_speed.x;
-                breakout_state->ball_position.y += breakout_state->ball_speed.y;
+            // Ball collision wiht bottom
+            if(breakout_state->ball_position.y + breakout_state->ball_rad >= GetScreenHeight()) {
+                breakout_state->lives--;
+                breakout_state->ball_active = false;
 
-                // Ball collision wall
+                if(breakout_state->lives <= 0) {
+                    breakout_state->game_over = true;
+                    breakout_state->current_screen = BREAKOUT_MENU;
+                }
+            }
 
+            // Ball collision with padle
+            if(CheckCollisionCircleRec(breakout_state->ball_position, breakout_state->ball_rad, breakout_state->paddle)) {
+                breakout_state->ball_speed.y *= -1;
+
+                // Direction based on hit position
+                float relative_intersection = (breakout_state->ball_position.x - breakout_state->paddle.x) / breakout_state->paddle_width;
+                breakout_state->ball_speed.x = (relative_intersection - 0.5) * 10;
+            }
+
+            // Ball collison with bricks
+            for(int i = 0; i < breakout_state->brick_count; i++) {
+                if(breakout_state->bricks_active[i] &&
+                    CheckCollisionCircleRec(breakout_state->ball_position, breakout_state->ball_rad, breakout_state->bricks[i])) {
+                    breakout_state->bricks_active[i] = false;
+                    breakout_state->score += 1;
+                    breakout_state->ball_speed.y *= -1;
+
+                    // Check all bricks destroyed
+                    bool all_destroyed = false;
+                    for(int j = 0; j < breakout_state->brick_count; j++) {
+                        if(breakout_state->bricks_active[j]) {
+                            all_destroyed = false;
+                            break;
+                        }
+                    }
+
+                    if(all_destroyed) {
+                        breakout_state->victory = true;
+                        breakout_state->current_screen = BREAKOUT_MENU;
+                    }
+                    break;
+                }
             }
         }
+
+        // Launch ball
+        if(!breakout_state->ball_active && IsKeyPressed(KEY_SPACE)) {
+            breakout_state->ball_active = true;
+            breakout_state->ball_position = (Vector2) {
+                breakout_state->paddle.x - breakout_state->paddle_width/2,
+                breakout_state->paddle.y - breakout_state->ball_rad
+            };
+            breakout_state->ball_speed = (Vector2){0, -5};
+        }
     }
+    return true;
 }
