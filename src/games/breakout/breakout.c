@@ -149,3 +149,82 @@ bool BreakoutUpdate(BreakoutGameState *state) {
     }
     return true;
 }
+
+void BreakoutDraw(BreakoutGameState *state) {
+    BreakoutGameState *breakout_state = (BreakoutGameState*)state;
+
+    ClearBackground(BLACK);
+
+    switch(breakout_state->current_screen) {
+        case BREAKOUT_MENU: {
+            DrawText("BREAKOUT", GetScreenWidth()/2 - MeasureText("BREAKOUT", 60)/2, GetScreenHeight()/4, 60, WHITE);
+            DrawText("Press ENTER to Start", GetScreenWidth()/2 - MeasureText("Press ENTER to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
+
+            DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight()/2 + 50, 20, GRAY);
+        }
+        case BREAKOUT_GAMEPLAY: {
+            // Draw brick
+            for(int i = 0; i < breakout_state->brick_count; i++) {
+                if(breakout_state->bricks_active[i]) {
+                    Color color;
+
+                    switch(i / breakout_state->brick_cols) {
+                        case 0: color = RED; break;
+                        case 1: color = ORANGE; break;
+                        case 2: color = YELLOW; break;
+                        case 3: color = GREEN; break;
+                        default: color = BLUE;
+                    }
+                    DrawRectangleRec(breakout_state->bricks[i], color);
+                }
+            }
+
+            // Draw paddle
+            DrawRectangleRec(breakout_state->paddle, WHITE);
+
+            // Draw ball
+            DrawCircleV(breakout_state->ball_position, breakout_state->ball_rad, WHITE);
+
+            // If ball not active instructions
+            if(!breakout_state->ball_active) {
+                DrawText("Press SPACE to Launch Ball", GetScreenWidth()/2 - MeasureText("Press SPACE to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
+            }
+
+            // Draw score and lives
+            DrawText(TextFormat("Score: %d", breakout_state->score), 10, 10, 20, WHITE);
+            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 120, 10, 20, WHITE);
+            DrawText(TextFormat("Level: %d", breakout_state->level), GetScreenWidth()/2 - 50, 10, 20, WHITE);
+        }
+        case BREAKOUT_PAUSED: {
+            // Draw brick
+            for(int i = 0; i < breakout_state->brick_count; i++) {
+                if(breakout_state->bricks_active[i]) {
+                    Color color;
+
+                    switch(i / breakout_state->brick_cols) {
+                        case 0: color = RED; break;
+                        case 1: color = ORANGE; break;
+                        case 2: color = YELLOW; break;
+                        case 3: color = GREEN; break;
+                        default: color = BLUE;
+                    }
+                    DrawRectangleRec(breakout_state->bricks[i], color);
+                }
+            }
+
+            // Draw paddle
+            DrawRectangleRec(breakout_state->paddle, WHITE);
+
+            // Draw ball
+            DrawCircleV(breakout_state->ball_position, breakout_state->ball_rad, WHITE);
+
+            // Draw score and lives
+            DrawText(TextFormat("Score: %d", breakout_state->score), 10, 10, 20, WHITE);
+            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 120, 10, 20, WHITE);
+            DrawText(TextFormat("Level: %d", breakout_state->level), GetScreenWidth()/2 - 50, 10, 20, WHITE);
+
+            DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2 - 20, 40, WHITE);
+            DrawText("Press P to Resume", GetScreenWidth()/2 - MeasureText("Press P to Resume", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
+        }
+    }
+}
