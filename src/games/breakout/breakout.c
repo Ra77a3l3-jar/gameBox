@@ -62,17 +62,21 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         if(breakout_state->current_screen == BREAKOUT_GAMEPLAY) {
             breakout_state->prev_screen = breakout_state->current_screen;
             breakout_state->current_screen = BREAKOUT_PAUSED;
-        } else if(breakout_state->current_screen == BREAKOUT_PAUSED) {
+        }
+    }
+    if(IsKeyPressed(KEY_P)) {
+        if(breakout_state->current_screen == BREAKOUT_PAUSED) {
             breakout_state->current_screen = breakout_state->prev_screen;
+            breakout_state->prev_screen = BREAKOUT_PAUSED;
         }
     }
 
     if(breakout_state->current_screen == BREAKOUT_GAMEPLAY) {
         // Paddle movement
-        if(IsKeyPressed(breakout_state->key_left) && breakout_state->paddle.x > 0) {
+        if(IsKeyDown(breakout_state->key_left) && breakout_state->paddle.x > 0) {
             breakout_state->paddle.x -= breakout_state->paddle_speed;
         }
-        if(IsKeyPressed(breakout_state->key_right) && breakout_state->paddle.x + breakout_state->paddle_width < GetScreenWidth()) {
+        if(IsKeyDown(breakout_state->key_right) && breakout_state->paddle.x + breakout_state->paddle_width < GetScreenWidth()) {
             breakout_state->paddle.x += breakout_state->paddle_speed;
         }
 
@@ -160,6 +164,10 @@ void BreakoutDraw(BreakoutGameState *state) {
             DrawText("BREAKOUT", GetScreenWidth()/2 - MeasureText("BREAKOUT", 60)/2, GetScreenHeight()/4, 60, WHITE);
             DrawText("Press ENTER to Start", GetScreenWidth()/2 - MeasureText("Press ENTER to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
 
+            if(IsKeyPressed(KEY_ENTER)) {
+                breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+            }
+
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight()/2 + 50, 20, GRAY);
         }
         case BREAKOUT_GAMEPLAY: {
@@ -227,4 +235,8 @@ void BreakoutDraw(BreakoutGameState *state) {
             DrawText("Press P to Resume", GetScreenWidth()/2 - MeasureText("Press P to Resume", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
         }
     }
+}
+
+void BreakoutClose(BreakoutGameState *state) {
+
 }

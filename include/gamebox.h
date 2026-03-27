@@ -11,7 +11,8 @@ typedef void (*GameCloseFunc)(void*);
 
 typedef enum {
     GAMEBOX_MENU,
-    GAMEBOX_PONG
+    GAMEBOX_PONG,
+    GAMEBOX_BREAKOUT
 } GameBoxScreen;
 
 typedef struct {
@@ -32,5 +33,6 @@ void DrawGameBox(GameBoxState *state);
 void CloseGameBox(GameBoxState *state);
 
 void RegisterPongGame(GameBoxState *state);
+void RegisterBreakoutGame(GameBoxState *state);
 
 #endif

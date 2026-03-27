@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "gamebox.h"
 #include "pong.h"
+#include "breakout.h"
 
 void InitGameBox(GameBoxState *state) {
     state->current_screen = GAMEBOX_MENU;
@@ -17,20 +18,23 @@ void InitGameBox(GameBoxState *state) {
 
 void UpdateGameBox(GameBoxState *state) {
     if(state->current_screen == GAMEBOX_MENU) {
-        if(IsKeyPressed(KEY_ENTER)) {
+        if(IsKeyPressed(KEY_ONE)) {
             RegisterPongGame(state);
             state->current_screen = GAMEBOX_PONG;
             state->prev_screen = GAMEBOX_MENU;
+        } else if(IsKeyPressed(KEY_TWO)) {
+            RegisterBreakoutGame(state);
+            state->current_screen = GAMEBOX_BREAKOUT;
+            state->prev_screen = GAMEBOX_MENU;
+        }
 
-            if(state->game_init) {
-                state->game_init(state->game_state);
-            }
+        if(state->game_init) {
+            state->game_init(state->game_state);
         }
     } else {
-        // Updating currenty running game
         if(state->game_update) {
-            bool should_continue = state->game_update(state->game_state);
-            if(!should_continue) {
+            bool continue_game = state->game_update(state->game_state);
+            if(!continue_game) {
                 if(state->game_close) {
                     state->game_close(state->game_state);
                 }
@@ -39,17 +43,6 @@ void UpdateGameBox(GameBoxState *state) {
                 state->current_screen = GAMEBOX_MENU;
                 return;
             }
-            
-            state->game_update(state->game_state);
-        }        
-
-        if(IsKeyPressed(KEY_ESCAPE)) {
-            if(state->game_close) {
-                state->game_close(state->game_state);
-            }
-            free(state->game_state);
-            state->current_screen = GAMEBOX_MENU;
-            state->game_state = NULL;
         }
     }
 }
@@ -61,9 +54,10 @@ void DrawGameBox(GameBoxState *state) {
         DrawText("GAMEBOX", GetScreenWidth()/2 - MeasureText("GAMEBOX", 80)/2, 100, 80, ORANGE);
 
         // Game selection
-        DrawText("PONG", GetScreenWidth()/2 - MeasureText("PONG", 50)/2, 300, 50, WHITE);
-        DrawText("Press ENTER to play", GetScreenWidth()/2 - MeasureText("Press ENTER to play", 25)/2, 400, 25, GRAY);
-        DrawText("More games coming soon...", GetScreenWidth()/2 - MeasureText("More games coming soon...", 20)/2, 450, 20, GRAY);
+        DrawText("1. PONG", GetScreenWidth()/2 - MeasureText("1. PONG", 50)/2, 300, 40, WHITE);
+        DrawText("2. BREAKOUT", GetScreenWidth()/2 - MeasureText("2. BREAKOUT", 50)/2, 360, 40, WHITE);
+        DrawText("Press 1 or 2 to play", GetScreenWidth()/2 - MeasureText("Press 1 or 2 to play", 25)/2, 400, 25, GRAY);
+        DrawText("Press ESC to exit", GetScreenWidth()/2 - MeasureText("Press ESC to exit", 20)/2, 450, 20, GRAY);
     } else {
         // Draw current game
         if(state->game_draw) {
@@ -86,4 +80,13 @@ void RegisterPongGame(GameBoxState *state) {
     state->game_update = (GameUpdateFunc)PongUpdate;
     state->game_draw = (GameDrawFunc)PongDraw;
     state->game_close = (GameCloseFunc)PongClose;
+}
+
+void RegisterBreakoutGame(GameBoxState *state) {
+    state->game_state = malloc(sizeof(BreakoutGameState));
+
+    state->game_init = (GameInitFunc)BreakoutInit;
+    state->game_update = (GameUpdateFunc)BreakoutUpdate;
+    state->game_draw = (GameDrawFunc)BreakoutDraw;
+    state->game_close = (GameCloseFunc)BreakoutClose;
 }
