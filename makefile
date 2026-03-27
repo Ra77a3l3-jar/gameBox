@@ -13,7 +13,7 @@ BIN_DIR = bin
 TARGET = $(BIN_DIR)/game
 
 # Source and object files
-SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/games/pong/*.c)
+SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/games/pong/*.c) $(wildcard $(SRC_DIR)/games/breakout/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Default target
