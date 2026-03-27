@@ -30,6 +30,7 @@ typedef struct {
     Vector2 ball_position;
     Vector2 ball_speed;
     float ball_rad;
+    bool ball_active;
 
     Rectangle bricks[100];
     bool bricks_active[100];
@@ -52,5 +53,7 @@ void BreakoutInit(BreakoutGameState *state);
 bool BreakoutUpdate(BreakoutGameState *state);
 void BreakoutDraw(BreakoutGameState *state);
 void BreakoutClose(BreakoutGameState *state);
+
+void BreakoutSetupLevel(BreakoutGameState *state);
 
 #endif
