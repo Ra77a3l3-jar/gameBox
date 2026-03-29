@@ -15,7 +15,7 @@ void BreakoutInit(BreakoutGameState *state) {
     breakout_state->victory = false;
 
     breakout_state->paddle_width = PADDLE_WIDTH;
-    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - PADDLE_WIDTH/2, GetScreenHeight()/2 - 50, PADDLE_WIDTH, PADDLE_HEIGHT};
+    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - PADDLE_WIDTH/2, GetScreenHeight() - 50, PADDLE_WIDTH, PADDLE_HEIGHT};
     breakout_state->paddle_speed = PADDLE_SPEED;
 
     breakout_state->ball_rad = BALL_RADIUS;
@@ -58,16 +58,21 @@ void BreakoutSetupLevel(BreakoutGameState *state) {
 bool BreakoutUpdate(BreakoutGameState *state) {
     BreakoutGameState *breakout_state = (BreakoutGameState*)state;
 
+    // ESC key handling
     if(IsKeyPressed(KEY_ESCAPE)) {
         if(breakout_state->current_screen == BREAKOUT_GAMEPLAY) {
             breakout_state->prev_screen = breakout_state->current_screen;
             breakout_state->current_screen = BREAKOUT_PAUSED;
+        } else if(breakout_state->current_screen == BREAKOUT_PAUSED) {
+            breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+        } else if(breakout_state->current_screen == BREAKOUT_MENU) {
+            return false;
         }
     }
-    if(IsKeyPressed(KEY_P)) {
-        if(breakout_state->current_screen == BREAKOUT_PAUSED) {
-            breakout_state->current_screen = breakout_state->prev_screen;
-            breakout_state->prev_screen = BREAKOUT_PAUSED;
+
+    if(breakout_state->current_screen == BREAKOUT_MENU) {
+        if(IsKeyPressed(KEY_ENTER)) {
+            breakout_state->current_screen = BREAKOUT_GAMEPLAY;
         }
     }
 
@@ -85,7 +90,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
             breakout_state->ball_position.x += breakout_state->ball_speed.x;
             breakout_state->ball_position.y += breakout_state->ball_speed.y;
 
-            // Ball collision wall
+            // Ball collision with wall
             if(breakout_state->ball_position.x - breakout_state->ball_rad <= 0 ||
                 breakout_state->ball_position.x + breakout_state->ball_rad >= GetScreenWidth()) {
                 breakout_state->ball_speed.x *= -1;
@@ -95,7 +100,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                 breakout_state->ball_speed.y *= -1;
             }
 
-            // Ball collision wiht bottom
+            // Ball collision with bottom
             if(breakout_state->ball_position.y + breakout_state->ball_rad >= GetScreenHeight()) {
                 breakout_state->lives--;
                 breakout_state->ball_active = false;
@@ -106,7 +111,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                 }
             }
 
-            // Ball collision with padle
+            // Ball collision with paddle
             if(CheckCollisionCircleRec(breakout_state->ball_position, breakout_state->ball_rad, breakout_state->paddle)) {
                 breakout_state->ball_speed.y *= -1;
 
@@ -123,8 +128,8 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                     breakout_state->score += 1;
                     breakout_state->ball_speed.y *= -1;
 
-                    // Check all bricks destroyed
-                    bool all_destroyed = false;
+                    // Check if all bricks destroyed
+                    bool all_destroyed = true;
                     for(int j = 0; j < breakout_state->brick_count; j++) {
                         if(breakout_state->bricks_active[j]) {
                             all_destroyed = false;
@@ -145,12 +150,13 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         if(!breakout_state->ball_active && IsKeyPressed(KEY_SPACE)) {
             breakout_state->ball_active = true;
             breakout_state->ball_position = (Vector2) {
-                breakout_state->paddle.x - breakout_state->paddle_width/2,
+                breakout_state->paddle.x + breakout_state->paddle_width/2,
                 breakout_state->paddle.y - breakout_state->ball_rad
             };
             breakout_state->ball_speed = (Vector2){0, -5};
         }
     }
+
     return true;
 }
 
@@ -163,15 +169,10 @@ void BreakoutDraw(BreakoutGameState *state) {
         case BREAKOUT_MENU: {
             DrawText("BREAKOUT", GetScreenWidth()/2 - MeasureText("BREAKOUT", 60)/2, GetScreenHeight()/4, 60, WHITE);
             DrawText("Press ENTER to Start", GetScreenWidth()/2 - MeasureText("Press ENTER to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
-
-            if(IsKeyPressed(KEY_ENTER)) {
-                breakout_state->current_screen = BREAKOUT_GAMEPLAY;
-            }
-
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight()/2 + 50, 20, GRAY);
+            break;
         }
         case BREAKOUT_GAMEPLAY: {
-            // Draw brick
             for(int i = 0; i < breakout_state->brick_count; i++) {
                 if(breakout_state->bricks_active[i]) {
                     Color color;
@@ -181,7 +182,7 @@ void BreakoutDraw(BreakoutGameState *state) {
                         case 1: color = ORANGE; break;
                         case 2: color = YELLOW; break;
                         case 3: color = GREEN; break;
-                        default: color = BLUE;
+                        default: color = BLUE; break;
                     }
                     DrawRectangleRec(breakout_state->bricks[i], color);
                 }
@@ -193,18 +194,19 @@ void BreakoutDraw(BreakoutGameState *state) {
             // Draw ball
             DrawCircleV(breakout_state->ball_position, breakout_state->ball_rad, WHITE);
 
-            // If ball not active instructions
+            // Instructions
             if(!breakout_state->ball_active) {
                 DrawText("Press SPACE to Launch Ball", GetScreenWidth()/2 - MeasureText("Press SPACE to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
             }
 
-            // Draw score and lives
+            // Draw score, lives, and level
             DrawText(TextFormat("Score: %d", breakout_state->score), 10, 10, 20, WHITE);
-            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 120, 10, 20, WHITE);
+            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 150, 10, 20, WHITE);
             DrawText(TextFormat("Level: %d", breakout_state->level), GetScreenWidth()/2 - 50, 10, 20, WHITE);
+            break;
         }
         case BREAKOUT_PAUSED: {
-            // Draw brick
+            // Draw bricks
             for(int i = 0; i < breakout_state->brick_count; i++) {
                 if(breakout_state->bricks_active[i]) {
                     Color color;
@@ -214,7 +216,7 @@ void BreakoutDraw(BreakoutGameState *state) {
                         case 1: color = ORANGE; break;
                         case 2: color = YELLOW; break;
                         case 3: color = GREEN; break;
-                        default: color = BLUE;
+                        default: color = BLUE; break;
                     }
                     DrawRectangleRec(breakout_state->bricks[i], color);
                 }
@@ -226,13 +228,14 @@ void BreakoutDraw(BreakoutGameState *state) {
             // Draw ball
             DrawCircleV(breakout_state->ball_position, breakout_state->ball_rad, WHITE);
 
-            // Draw score and lives
+            // Draw score, lives, and level
             DrawText(TextFormat("Score: %d", breakout_state->score), 10, 10, 20, WHITE);
-            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 120, 10, 20, WHITE);
+            DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 150, 10, 20, WHITE);
             DrawText(TextFormat("Level: %d", breakout_state->level), GetScreenWidth()/2 - 50, 10, 20, WHITE);
 
             DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2 - 20, 40, WHITE);
-            DrawText("Press P to Resume", GetScreenWidth()/2 - MeasureText("Press P to Resume", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
+            DrawText("Press ESC to Resume", GetScreenWidth()/2 - MeasureText("Press ESC to Resume", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
+            break;
         }
     }
 }

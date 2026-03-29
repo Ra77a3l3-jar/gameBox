@@ -51,6 +51,10 @@ void UpdateGameBox(GameBoxState *state) {
                 }
                 free(state->game_state);
                 state->game_state = NULL;
+                state->game_init = NULL;
+                state->game_update = NULL;
+                state->game_draw = NULL;
+                state->game_close = NULL;
                 state->current_screen = GAMEBOX_MENU;
                 return;
             }
