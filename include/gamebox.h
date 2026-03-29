@@ -18,6 +18,8 @@ typedef enum {
 typedef struct {
     GameBoxScreen current_screen;
     GameBoxScreen prev_screen;
+    
+    int selected_game; // 0 for PONG, 1 for BREAKOUT
 
     void *game_state; // Current game
 
