@@ -18,7 +18,9 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        UpdateGameBox(&state);
+        if(!UpdateGameBox(&state)) {
+            break;
+        }
         DrawGameBox(&state);
 
         EndDrawing();

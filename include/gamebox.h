@@ -30,7 +30,7 @@ typedef struct {
 } GameBoxState;
 
 void InitGameBox(GameBoxState *state);
-void UpdateGameBox(GameBoxState *state);
+bool UpdateGameBox(GameBoxState *state);
 void DrawGameBox(GameBoxState *state);
 void CloseGameBox(GameBoxState *state);
 

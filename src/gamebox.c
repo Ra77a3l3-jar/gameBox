@@ -17,8 +17,12 @@ void InitGameBox(GameBoxState *state) {
     state->game_close = NULL;
 }
 
-void UpdateGameBox(GameBoxState *state) {
+bool UpdateGameBox(GameBoxState *state) {
     if(state->current_screen == GAMEBOX_MENU) {
+        if(IsKeyPressed(KEY_ESCAPE)) {
+            return false;
+        }
+
         // Handle arrow key navigation
         if(IsKeyPressed(KEY_UP)) {
             state->selected_game = (state->selected_game - 1 + 2) % 2;
@@ -56,10 +60,11 @@ void UpdateGameBox(GameBoxState *state) {
                 state->game_draw = NULL;
                 state->game_close = NULL;
                 state->current_screen = GAMEBOX_MENU;
-                return;
+                return true;
             }
         }
     }
+    return true;
 }
 
 void DrawGameBox(GameBoxState *state) {
@@ -71,7 +76,7 @@ void DrawGameBox(GameBoxState *state) {
         // Game selection with highlighting
         Color pong_color = (state->selected_game == 0) ? YELLOW : WHITE;
         Color breakout_color = (state->selected_game == 1) ? YELLOW : WHITE;
-        
+
         DrawText("1. PONG", GetScreenWidth()/2 - MeasureText("1. PONG", 50)/2, 300, 40, pong_color);
         DrawText("2. BREAKOUT", GetScreenWidth()/2 - MeasureText("2. BREAKOUT", 50)/2, 360, 40, breakout_color);
         DrawText("Use UP/DOWN arrows to select, ENTER to play", GetScreenWidth()/2 - MeasureText("Use UP/DOWN arrows to select, ENTER to play", 25)/2, 400, 25, GRAY);
