@@ -15,7 +15,12 @@ void BreakoutInit(BreakoutGameState *state) {
     breakout_state->victory = false;
 
     breakout_state->paddle_width = PADDLE_WIDTH;
-    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - PADDLE_WIDTH/2, GetScreenHeight() - 50, PADDLE_WIDTH, PADDLE_HEIGHT};
+    breakout_state->paddle = (Rectangle) {
+        GetScreenWidth()/2 - PADDLE_WIDTH/2,
+        GetScreenHeight() - 50,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT
+    };
     breakout_state->paddle_speed = PADDLE_SPEED;
 
     breakout_state->ball_rad = BALL_RADIUS;
@@ -31,6 +36,8 @@ void BreakoutInit(BreakoutGameState *state) {
 
     breakout_state->key_left = KEY_LEFT;
     breakout_state->key_right = KEY_RIGHT;
+
+    breakout_state->selected_pause = BREAKOUT_PAUSE_RESUME;
 
     BreakoutSetupLevel(breakout_state);
 }
@@ -66,7 +73,35 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         } else if(breakout_state->current_screen == BREAKOUT_PAUSED) {
             breakout_state->current_screen = BREAKOUT_GAMEPLAY;
         } else if(breakout_state->current_screen == BREAKOUT_MENU) {
+            // Return to main menu
             return false;
+        }
+    }
+
+    // Pause menu navigation
+    if(breakout_state->current_screen == BREAKOUT_PAUSED) {
+        if(IsKeyPressed(KEY_UP)) {
+            breakout_state->selected_pause = (breakout_state->selected_pause - 1 + BREAKOUT_PAUSE_OPTION_COUNT) % BREAKOUT_PAUSE_OPTION_COUNT;
+        } else if(IsKeyPressed(KEY_DOWN)) {
+            breakout_state->selected_pause = (breakout_state->selected_pause + 1) % BREAKOUT_PAUSE_OPTION_COUNT;
+        } else if(IsKeyPressed(KEY_ENTER)) {
+            switch(breakout_state->selected_pause) {
+                case BREAKOUT_PAUSE_RESUME: {
+                    breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+                    break;
+                }
+                case BREAKOUT_PAUSE_RESTART: {
+                    BreakoutInit(state);
+                    breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+                    break;
+                }
+                case BREAKOUT_PAUSE_QUIT: {
+                    breakout_state->current_screen = BREAKOUT_MENU;
+                    BreakoutInit(state);
+                    break;
+                }
+                default: break;
+            }
         }
     }
 
@@ -233,8 +268,20 @@ void BreakoutDraw(BreakoutGameState *state) {
             DrawText(TextFormat("Lives: %d", breakout_state->lives), GetScreenWidth() - 150, 10, 20, WHITE);
             DrawText(TextFormat("Level: %d", breakout_state->level), GetScreenWidth()/2 - 50, 10, 20, WHITE);
 
-            DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2 - 20, 40, WHITE);
-            DrawText("Press ESC to Resume", GetScreenWidth()/2 - MeasureText("Press ESC to Resume", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
+            DrawText("PAUSED", GetScreenWidth()/2 - MeasureText("PAUSED", 40)/2, GetScreenHeight()/2 - 100, 40, WHITE);
+
+            int menu_start_y = GetScreenHeight()/2 - 20;
+            int menu_spacing = 50;
+
+            Color resume_color = (breakout_state->selected_pause == BREAKOUT_PAUSE_RESUME) ? YELLOW : WHITE;
+            Color restart_color = (breakout_state->selected_pause == BREAKOUT_PAUSE_RESTART) ? YELLOW : WHITE;
+            Color quit_color = (breakout_state->selected_pause == BREAKOUT_PAUSE_QUIT) ? YELLOW : WHITE;
+
+            DrawText("Resume", GetScreenWidth()/2 - MeasureText("Resume", 30)/2, menu_start_y, 30, resume_color);
+            DrawText("Restart", GetScreenWidth()/2 - MeasureText("Restart", 30)/2, menu_start_y + menu_spacing, 30, restart_color);
+            DrawText("Quit to Menu", GetScreenWidth()/2 - MeasureText("Quit to Menu", 30)/2, menu_start_y + menu_spacing * 2, 30, quit_color);
+
+            DrawText("Use UP/DOWN to navigate, ENTER to select", GetScreenWidth()/2 - MeasureText("Use UP/DOWN to navigate, ENTER to select", 20)/2, GetScreenHeight() - 50, 20, GRAY);
             break;
         }
     }

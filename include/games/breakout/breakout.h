@@ -14,6 +14,13 @@
 #define BRICK_HEIGHT 20
 
 typedef enum {
+    BREAKOUT_PAUSE_RESUME,
+    BREAKOUT_PAUSE_RESTART,
+    BREAKOUT_PAUSE_QUIT,
+    BREAKOUT_PAUSE_OPTION_COUNT
+} BreakoutPauseOption;
+
+typedef enum {
     BREAKOUT_MENU,
     BREAKOUT_GAMEPLAY,
     BREAKOUT_PAUSED,
@@ -48,6 +55,8 @@ typedef struct {
 
     int key_left;
     int key_right;
+
+    int selected_pause;
 } BreakoutGameState;
 
 void BreakoutInit(BreakoutGameState *state);
