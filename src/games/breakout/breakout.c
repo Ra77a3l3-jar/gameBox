@@ -15,12 +15,7 @@ void BreakoutInit(BreakoutGameState *state) {
     breakout_state->victory = false;
 
     breakout_state->paddle_width = PADDLE_WIDTH;
-    breakout_state->paddle = (Rectangle) {
-        GetScreenWidth()/2 - PADDLE_WIDTH/2,
-        GetScreenHeight() - 50,
-        PADDLE_WIDTH,
-        PADDLE_HEIGHT
-    };
+    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - PADDLE_WIDTH/2, GetScreenHeight() - 50, PADDLE_WIDTH, PADDLE_HEIGHT};
     breakout_state->paddle_speed = PADDLE_SPEED;
 
     breakout_state->ball_rad = BALL_RADIUS;
@@ -79,8 +74,9 @@ bool BreakoutUpdate(BreakoutGameState *state) {
     }
 
     if(breakout_state->current_screen == BREAKOUT_MENU) {
-        if(IsKeyPressed(KEY_SPACE)) {
+        if(IsKeyPressed(KEY_ENTER)) {
             breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+            breakout_state->ball_active = false;
         }
     }
 
@@ -102,7 +98,6 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                     break;
                 }
                 case BREAKOUT_PAUSE_QUIT: {
-                    breakout_state->current_screen = BREAKOUT_MENU;
                     BreakoutInit(state);
                     break;
                 }
@@ -181,7 +176,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         }
 
         // Launch ball
-        if(!breakout_state->ball_active && IsKeyPressed(KEY_ENTER)) {
+        if(!breakout_state->ball_active && IsKeyPressed(KEY_SPACE)) {
             breakout_state->ball_active = true;
             breakout_state->ball_position = (Vector2) {
                 breakout_state->paddle.x + breakout_state->paddle_width/2,
@@ -202,7 +197,7 @@ void BreakoutDraw(BreakoutGameState *state) {
     switch(breakout_state->current_screen) {
         case BREAKOUT_MENU: {
             DrawText("BREAKOUT", GetScreenWidth()/2 - MeasureText("BREAKOUT", 60)/2, GetScreenHeight()/4, 60, WHITE);
-            DrawText("Press SPACE to Start", GetScreenWidth()/2 - MeasureText("Press SPACE to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
+            DrawText("Press ENTER to Start", GetScreenWidth()/2 - MeasureText("Press ENTER to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight()/2 + 50, 20, GRAY);
             break;
         }
@@ -216,7 +211,8 @@ void BreakoutDraw(BreakoutGameState *state) {
                         case 1: color = ORANGE; break;
                         case 2: color = YELLOW; break;
                         case 3: color = GREEN; break;
-                        default: color = BLUE; break;
+                        case 4: color = BLUE; break;
+                        case 5: color = PURPLE; break;
                     }
                     DrawRectangleRec(breakout_state->bricks[i], color);
                 }
@@ -230,7 +226,7 @@ void BreakoutDraw(BreakoutGameState *state) {
 
             // Instructions
             if(!breakout_state->ball_active) {
-                DrawText("Press ENTER to Launch Ball", GetScreenWidth()/2 - MeasureText("Press ENTER to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
+                DrawText("Press SPACE to Launch Ball", GetScreenWidth()/2 - MeasureText("Press SPACE to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
             }
 
             // Draw score, lives, and level
@@ -250,7 +246,8 @@ void BreakoutDraw(BreakoutGameState *state) {
                         case 1: color = ORANGE; break;
                         case 2: color = YELLOW; break;
                         case 3: color = GREEN; break;
-                        default: color = BLUE; break;
+                        case 4: color = BLUE; break;
+                        case 5: color = PURPLE; break;
                     }
                     DrawRectangleRec(breakout_state->bricks[i], color);
                 }

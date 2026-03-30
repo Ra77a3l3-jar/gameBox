@@ -8,6 +8,7 @@
 #define PADDLE_HEIGHT 15
 #define PADDLE_SPEED 8
 #define BALL_RADIUS 6
+#define BRICK_MAX_COLS 6
 #define BRICK_ROWS 5
 #define BRICK_COLS 10
 #define BRICK_PADD 5
