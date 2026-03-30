@@ -56,7 +56,7 @@ typedef struct {
     int key_left;
     int key_right;
 
-    int selected_pause;
+    BreakoutPauseOption selected_pause;
 } BreakoutGameState;
 
 void BreakoutInit(BreakoutGameState *state);

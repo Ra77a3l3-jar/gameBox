@@ -78,10 +78,16 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         }
     }
 
+    if(breakout_state->current_screen == BREAKOUT_MENU) {
+        if(IsKeyPressed(KEY_SPACE)) {
+            breakout_state->current_screen = BREAKOUT_GAMEPLAY;
+        }
+    }
+
     // Pause menu navigation
     if(breakout_state->current_screen == BREAKOUT_PAUSED) {
         if(IsKeyPressed(KEY_UP)) {
-            breakout_state->selected_pause = (breakout_state->selected_pause - 1 + BREAKOUT_PAUSE_OPTION_COUNT) % BREAKOUT_PAUSE_OPTION_COUNT;
+            breakout_state->selected_pause = (breakout_state->selected_pause + BREAKOUT_PAUSE_OPTION_COUNT - 1) % BREAKOUT_PAUSE_OPTION_COUNT;
         } else if(IsKeyPressed(KEY_DOWN)) {
             breakout_state->selected_pause = (breakout_state->selected_pause + 1) % BREAKOUT_PAUSE_OPTION_COUNT;
         } else if(IsKeyPressed(KEY_ENTER)) {
@@ -100,14 +106,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                     BreakoutInit(state);
                     break;
                 }
-                default: break;
             }
-        }
-    }
-
-    if(breakout_state->current_screen == BREAKOUT_MENU) {
-        if(IsKeyPressed(KEY_ENTER)) {
-            breakout_state->current_screen = BREAKOUT_GAMEPLAY;
         }
     }
 
@@ -182,7 +181,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
         }
 
         // Launch ball
-        if(!breakout_state->ball_active && IsKeyPressed(KEY_SPACE)) {
+        if(!breakout_state->ball_active && IsKeyPressed(KEY_ENTER)) {
             breakout_state->ball_active = true;
             breakout_state->ball_position = (Vector2) {
                 breakout_state->paddle.x + breakout_state->paddle_width/2,
@@ -203,7 +202,7 @@ void BreakoutDraw(BreakoutGameState *state) {
     switch(breakout_state->current_screen) {
         case BREAKOUT_MENU: {
             DrawText("BREAKOUT", GetScreenWidth()/2 - MeasureText("BREAKOUT", 60)/2, GetScreenHeight()/4, 60, WHITE);
-            DrawText("Press ENTER to Start", GetScreenWidth()/2 - MeasureText("Press ENTER to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
+            DrawText("Press SPACE to Start", GetScreenWidth()/2 - MeasureText("Press SPACE to Start", 30)/2, GetScreenHeight()/2, 30, WHITE);
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight()/2 + 50, 20, GRAY);
             break;
         }
@@ -231,7 +230,7 @@ void BreakoutDraw(BreakoutGameState *state) {
 
             // Instructions
             if(!breakout_state->ball_active) {
-                DrawText("Press SPACE to Launch Ball", GetScreenWidth()/2 - MeasureText("Press SPACE to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
+                DrawText("Press ENTER to Launch Ball", GetScreenWidth()/2 - MeasureText("Press ENTER to Launch Ball", 20)/2, GetScreenHeight()/2, 20, GRAY);
             }
 
             // Draw score, lives, and level

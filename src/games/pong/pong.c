@@ -13,10 +13,10 @@ int victory_points_options[VICTORY_POINTS_OPTIONS] = {5, 10, 15, 20};
 
 void PongInit(void *state) {
     PongGameState *pong_state = (PongGameState*)state;
-    
+
     pong_state->current_screen = PONG_MENU;
     pong_state->prev_screen = PONG_MENU;
-    
+
     pong_state->vs_computer = false;
 
     pong_state->player_paddle = (Rectangle){20, GetScreenHeight()/2 - 50, 20, 100};
@@ -24,7 +24,7 @@ void PongInit(void *state) {
 
     pong_state->ball_position = (Vector2){GetScreenWidth()/2, GetScreenHeight()/2};
     pong_state->ball_speed = (Vector2){5, 3};
-    
+
     pong_state->player_score = 0;
     pong_state->oponent_score = 0;
     pong_state->game_over = false;
@@ -57,7 +57,7 @@ bool PongUpdate(void *state) {
         // Keep player paddle on left side (x stays at 20)
         // Update opponent paddle to stay on right side
         pong_state->oponent_paddle.x = GetScreenWidth() - 40;
-        
+
         // Adjust paddle Y position to suite new screen bounds
         if(pong_state->player_paddle.y + pong_state->player_paddle.height > GetScreenHeight()) {
             pong_state->player_paddle.y = GetScreenHeight() - pong_state->player_paddle.height;
@@ -65,7 +65,7 @@ bool PongUpdate(void *state) {
         if(pong_state->oponent_paddle.y + pong_state->oponent_paddle.height > GetScreenHeight()) {
             pong_state->oponent_paddle.y = GetScreenHeight() - pong_state->oponent_paddle.height;
         }
-        
+
         // Adjust ball position to new screen bounds
         if(pong_state->ball_position.x > GetScreenWidth()) {
             pong_state->ball_position.x = GetScreenWidth() - 20;
@@ -107,6 +107,18 @@ bool PongUpdate(void *state) {
         }
     }
 
+    if(pong_state->current_screen == PONG_MENU) {
+        if (IsKeyPressed(KEY_ONE)) {
+            pong_state->vs_computer = false;
+            pong_state->current_screen = PONG_GAMEPLAY;
+        } else if (IsKeyPressed(KEY_TWO)) {
+            pong_state->vs_computer = true;
+            pong_state->current_screen = PONG_GAMEPLAY;
+        } else if (IsKeyPressed(KEY_S)) {
+            pong_state->current_screen = PONG_SETTINGS;
+        }
+    }
+
     if(pong_state->current_screen == PONG_PAUSED) {
         if(IsKeyPressed(KEY_UP)) {
             pong_state->selected_pause =(pong_state->selected_pause + PAUSE_OPTION_COUT - 1) % PAUSE_OPTION_COUT;
@@ -123,7 +135,7 @@ bool PongUpdate(void *state) {
                         PongInit(state);
                         pong_state->vs_computer = vs_computer;
                         pong_state->current_screen = PONG_GAMEPLAY;
-                        break;      
+                        break;
                 }
                 case PAUSE_SETTINGS: {
                         pong_state->prev_screen = PONG_PAUSED;
@@ -133,17 +145,17 @@ bool PongUpdate(void *state) {
                 case PAUSE_QUIT: {
                         pong_state->current_screen = PONG_MENU;
                         PongInit(state);
-                        break;        
+                        break;
                 }
             }
         }
     }
-    
+
     if(pong_state->current_screen == PONG_GAMEPLAY) {
         // Player movement
         float prev_player_y = pong_state->player_paddle.y;
         float prev_oponent_y = pong_state->oponent_paddle.y;
-        
+
         if(IsKeyDown(pong_state->key_player_up) && pong_state->player_paddle.y > 0) {
             pong_state->player_paddle.y -= 7;
         }
@@ -187,7 +199,7 @@ bool PongUpdate(void *state) {
             // Randomize a bit the bouncing from colliding with the wall
             float randomFactor = ((float)GetRandomValue(-30, 30) / 100.0f);
             pong_state->ball_position.x += randomFactor;
-            
+
             PlaySound(pong_state->wall_hit_sound);
         }
 
@@ -257,15 +269,6 @@ void PongDraw(void *state) {
                 DrawText("Press 2 for PvE", GetScreenWidth()/2 - MeasureText("Press 2 for PvE", 30)/2, GetScreenHeight()/2 + 40, 30, WHITE);
                 DrawText("Press S for Settings", GetScreenWidth()/2 - MeasureText("Press S for Settings", 30)/2, GetScreenHeight()/2 + 80, 30, WHITE);
                 DrawText("Press ESC to Exit", GetScreenWidth()/2 - MeasureText("Press ESC to Exit", 30)/2, GetScreenHeight()/2 + 120, 30, WHITE);
-                if (IsKeyPressed(KEY_ONE)) {
-                    pong_state->vs_computer = false;
-                    pong_state->current_screen = PONG_GAMEPLAY;
-                } else if (IsKeyPressed(KEY_TWO)) {
-                    pong_state->vs_computer = true;
-                    pong_state->current_screen = PONG_GAMEPLAY;
-                } else if (IsKeyPressed(KEY_S)) {
-                    pong_state->current_screen = PONG_SETTINGS;
-                }
                 break;
         }
         case PONG_GAMEPLAY: {
@@ -275,7 +278,7 @@ void PongDraw(void *state) {
 
                 // Draw ball
                 DrawCircleV(pong_state->ball_position, 10, WHITE);
-                
+
                 // Draw points
                 DrawText(TextFormat("%d", pong_state->player_score), GetScreenWidth()/4, 50, 30, WHITE);
                 DrawText(TextFormat("%d", pong_state->oponent_score), 3*GetScreenWidth()/4, 50, 30, WHITE);
@@ -366,7 +369,7 @@ void PongDraw(void *state) {
                 int vp_y = start_y;
                 Color vp_title_color = (pong_state->selected_settings_section == SETTINGS_VICTORY_POINTS) ? YELLOW : WHITE;
                 DrawText("VICTORY POINTS", GetScreenWidth()/2 - MeasureText("VICTORY POINTS", 30)/2, vp_y, 30, vp_title_color);
-                
+
                 // Draw selection indicator
                 if(pong_state->selected_settings_section == SETTINGS_VICTORY_POINTS) {
                     DrawText(">", GetScreenWidth()/2 - MeasureText("VICTORY POINTS", 30)/2 - 30, vp_y, 30, YELLOW);
@@ -375,7 +378,7 @@ void PongDraw(void *state) {
                 int vp_options_y = vp_y + 50;
                 int total_width = VICTORY_POINTS_OPTIONS * 60 - 10;
                 int start_x = GetScreenWidth()/2 - total_width/2;
-                
+
                 for(int i = 0; i < VICTORY_POINTS_OPTIONS; i++) {
                     Color color = (victory_points_options[i] == pong_state->victory_points) ? GREEN : GRAY;
                     DrawRectangle(start_x + i * 60, vp_options_y, 40, 40, color);
@@ -386,7 +389,7 @@ void PongDraw(void *state) {
                 int diff_y = start_y + section_spacing;
                 Color diff_title_color = (pong_state->selected_settings_section == SETTINGS_DIFFICULTY) ? YELLOW : WHITE;
                 DrawText("DIFFICULTY", GetScreenWidth()/2 - MeasureText("DIFFICULTY", 30)/2, diff_y, 30, diff_title_color);
-                
+
                 // Selection indicator
                 if(pong_state->selected_settings_section == SETTINGS_DIFFICULTY) {
                     DrawText(">", GetScreenWidth()/2 - MeasureText("DIFFICULTY", 30)/2 - 30, diff_y, 30, YELLOW);
@@ -395,7 +398,7 @@ void PongDraw(void *state) {
                 int diff_options_y = diff_y + 50;
                 int diff_total_width = DIFFICULTY_LEVELS * 50 - 10;
                 int diff_start_x = GetScreenWidth()/2 - diff_total_width/2;
-                
+
                 for(int i = 0; i < DIFFICULTY_LEVELS; i++) {
                     Color color = (i == pong_state->difficulty_level) ? RED : GRAY;
                     DrawRectangle(diff_start_x + i * 50, diff_options_y, 30, 30, color);
@@ -406,12 +409,12 @@ void PongDraw(void *state) {
                 int controls_y = start_y + section_spacing * 2;
                 Color controls_title_color = (pong_state->selected_settings_section == SETTINGS_CONTROLS) ? YELLOW : WHITE;
                 DrawText("CONTROLS", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2, controls_y, 30, controls_title_color);
-                
+
                 // Draw selection indicator
                 if(pong_state->selected_settings_section == SETTINGS_CONTROLS) {
                     DrawText(">", GetScreenWidth()/2 - MeasureText("CONTROLS", 30)/2 - 30, controls_y, 30, YELLOW);
                 }
-                
+
                 // Controls
                 const char *controls[4] = {"Player Up", "Player Down", "Opponent Up", "Opponent Down"};
                 int keys[4] = {
@@ -429,7 +432,7 @@ void PongDraw(void *state) {
 
                     int text_width = MeasureText(buff, 20);
                     int x_pos = (GetScreenWidth() - text_width) / 2;
-                    
+
                     Color color = WHITE;
                     if(pong_state->waiting_for_key && pong_state->rebind_key == i + 1) {
                         color = RED;
@@ -460,7 +463,7 @@ void PongDraw(void *state) {
                 }
 
                 DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 18)/2, GetScreenHeight() - 30, 18, WHITE);
-                break;                                
+                break;
         }
         case PONG_VICTORY: {
                 const char *winner = (pong_state->victory_player == 0) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
@@ -474,7 +477,7 @@ void PongDraw(void *state) {
                     pong_state->current_screen = PONG_MENU;
                     PongInit(state);
                 }
-                break;        
+                break;
         }
     }
 }
