@@ -8,23 +8,35 @@
 #define PADDLE_HEIGHT 15
 #define PADDLE_SPEED 8
 #define BALL_RADIUS 6
-#define BRICK_MAX_COLS 6
+#define BRICK_MAX_ROWS 6
 #define BRICK_ROWS 5
+#define BRICK_MAX_COLS 15
 #define BRICK_COLS 10
 #define BRICK_PADD 5
 #define BRICK_HEIGHT 20
+#define LIVES_MAX 9
 
 typedef enum {
     BREAKOUT_PAUSE_RESUME,
     BREAKOUT_PAUSE_RESTART,
+    BREAKOUT_PAUSE_SETTINGS,
     BREAKOUT_PAUSE_QUIT,
     BREAKOUT_PAUSE_OPTION_COUNT
 } BreakoutPauseOption;
 
 typedef enum {
+    BREAKOUT_SETTINGS_PADDLE_WIDTH,
+    BREAKOUT_SETTINGS_ROWS,
+    BREAKOUT_SETTINGS_COLS,
+    BREAKOUT_SETTINGS_LIVES,
+    BREAKOUT_SETTINGS_SECTION_COUNT
+} BreakoutSettingsSection;
+
+typedef enum {
     BREAKOUT_MENU,
     BREAKOUT_GAMEPLAY,
     BREAKOUT_PAUSED,
+    BREAKOUT_SETTINGS,
 } BreakoutScreen;
 
 typedef struct {
@@ -58,6 +70,7 @@ typedef struct {
     int key_right;
 
     BreakoutPauseOption selected_pause;
+    BreakoutSettingsSection selected_settings_section;
 } BreakoutGameState;
 
 void BreakoutInit(BreakoutGameState *state);
