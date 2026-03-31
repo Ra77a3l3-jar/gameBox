@@ -1,34 +1,34 @@
 # Gamebox
-A collection of games made in C with Raylib
+A collection of classic arcade games copies made in C with Raylib
 
-## Roadmap
+## What do i want to achieve
 
-- [X] Core
-  - [X] Window
-  - [X] Game loop
+My goal with this project is to learn Raylib by creating functional and fun game clones.
+It's a way to improve my C programming skills while building something enjoyable to play.
 
-- [X] Rendering
-  - [X] Paddles
-  - [X] Ball
-  - [X] Score
+## Games
 
-- [X] Gameplay
-  - [X] Input
-  - [X] Ball movement
-  - [X] Collisions
-  - [X] Scoring
+### Pong
+- PvP and PvE modes
+- AI opponent with 6 difficulty levels
+- Dynamic ball physics
+- Sound effects
+- Full control remapping
+- Configurable victory points
 
-- [ ] Extras
-  - [X] AI
-  - [X] Sound
-  - [X] Menu
-  - [ ] Polish
+### Breakout
+- 5 levels with increasing difficulty
+- Lives system
+- Customizable brick layouts
+- Sound effects
+- Extensive settings (paddle width, ball size, lives, difficulty)
+- Level progression
 
-- Next Phase
-
-  [ ] Game box
-   - [ ] Pong
-   - [ ] Breakout
-   - [ ] Sneak
-   - [ ] Space Invader
-  
+### Games i would like to add
+- **Snake**
+- **Space Invaders**
+- **Tetris**
+- **Flipper**
+- **Doodle Jump**
+- **Minesweeper**
+- **Pac-Man**
