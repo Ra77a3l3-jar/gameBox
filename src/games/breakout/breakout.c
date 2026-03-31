@@ -14,11 +14,12 @@ void BreakoutInit(BreakoutGameState *state) {
     breakout_state->game_over = false;
     breakout_state->victory = false;
 
+    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - breakout_state->paddle_width/2, GetScreenHeight() - 50, breakout_state->paddle_width, PADDLE_HEIGHT};
     breakout_state->paddle_width = PADDLE_WIDTH;
-    breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - PADDLE_WIDTH/2, GetScreenHeight() - 50, PADDLE_WIDTH, PADDLE_HEIGHT};
     breakout_state->paddle_speed = PADDLE_SPEED;
 
     breakout_state->ball_rad = BALL_RADIUS;
+    breakout_state->ball_speed_multiplier = 1.0;
     breakout_state->ball_position = (Vector2){0, 0};
     breakout_state->ball_speed = (Vector2){0, 0};
     breakout_state->ball_active = false;
@@ -34,6 +35,7 @@ void BreakoutInit(BreakoutGameState *state) {
 
     breakout_state->paddle_sound = LoadSound("assets/audio/breakout/breakout_paddle.wav");
     breakout_state->brick_sound = LoadSound("assets/audio/breakout/breakout_brick.wav");
+    breakout_state->wall_hit_sound = LoadSound("assets/audio/breakout/breakout_wall_hit.wav");
     breakout_state->lose_life_sound = LoadSound("assets/audio/breakout/breakout_lose_life.wav");
     breakout_state->game_over_sound = LoadSound("assets/audio/breakout/breakout_game_over.wav");
     breakout_state->victory_sound = LoadSound("assets/audio/breakout/breakout_victory.wav");
@@ -86,7 +88,9 @@ bool BreakoutUpdate(BreakoutGameState *state) {
     if(breakout_state->current_screen == BREAKOUT_MENU) {
         if(IsKeyPressed(KEY_ENTER)) {
             breakout_state->current_screen = BREAKOUT_GAMEPLAY;
-            breakout_state->ball_active = false;
+            breakout_state->paddle = (Rectangle) {GetScreenWidth()/2 - breakout_state->paddle_width/2, GetScreenHeight() - 50, breakout_state->paddle_width, PADDLE_HEIGHT};
+            breakout_state->paddle_width = PADDLE_WIDTH;
+            breakout_state->paddle_speed = PADDLE_SPEED * (1 + (breakout_state->level - 1) * 0.5);
         } else if(IsKeyPressed(KEY_S)) {
             breakout_state->prev_screen = BREAKOUT_MENU;
             breakout_state->current_screen = BREAKOUT_SETTINGS;
@@ -123,6 +127,15 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                 breakout_state->lives += direction;
                 if(breakout_state->lives < 1) breakout_state->lives = 1;
                 if(breakout_state->lives > LIVES_MAX) breakout_state->lives = LIVES_MAX;
+            } else if(breakout_state->selected_settings_section == BREAKOUT_SETTINGS_LEVEL) {
+                breakout_state->level += direction;
+                if(breakout_state->level < 1) breakout_state->level = 1;
+                if(breakout_state->level > 5) breakout_state->level = 5;
+                breakout_state->ball_speed_multiplier = 0.5f + (breakout_state->level - 1) * 0.5;
+            } else if(breakout_state->selected_settings_section == BREAKOUT_SETTINGS_BALL_SIZE) {
+                breakout_state->ball_rad += direction;
+                if(breakout_state->ball_rad < 3) breakout_state->ball_rad = 3;
+                if(breakout_state->ball_rad > 15) breakout_state->ball_rad = 15;
             }
         }
     }
@@ -203,7 +216,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
 
                 // Direction based on hit position
                 float relative_intersection = (breakout_state->ball_position.x - breakout_state->paddle.x) / breakout_state->paddle_width;
-                breakout_state->ball_speed.x = (relative_intersection - 0.5) * 10;
+                breakout_state->ball_speed.x = (relative_intersection - 0.5) * 10 * breakout_state->ball_speed_multiplier;
                 PlaySound(breakout_state->paddle_sound);
             }
 
@@ -244,7 +257,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                 breakout_state->paddle.x + breakout_state->paddle_width/2,
                 breakout_state->paddle.y - breakout_state->ball_rad
             };
-            breakout_state->ball_speed = (Vector2){0, -5};
+            breakout_state->ball_speed = (Vector2){0, -5 * breakout_state->ball_speed_multiplier};
         }
     }
 
@@ -289,6 +302,16 @@ void BreakoutDraw(BreakoutGameState *state) {
             Color lives_color = (breakout_state->selected_settings_section == BREAKOUT_SETTINGS_LIVES) ? YELLOW : WHITE;
             DrawText("Lives", GetScreenWidth()/2 - MeasureText("Lives", 30)/2, lives_y, 30, lives_color);
             DrawText(TextFormat("%d", breakout_state->lives), GetScreenWidth()/2 - MeasureText("9", 30)/2, lives_y + 40, 30, GREEN);
+
+            int level_y = start_y + section_spacing * 4;
+            Color level_color = (breakout_state->selected_settings_section == BREAKOUT_SETTINGS_LEVEL) ? YELLOW : WHITE;
+            DrawText("Level", GetScreenWidth()/2 - MeasureText("Level", 30)/2, level_y, 30, level_color);
+            DrawText(TextFormat("%d", breakout_state->level), GetScreenWidth()/2 - MeasureText("5", 30)/2, level_y + 40, 30, GREEN);
+
+            int ball_y = start_y + section_spacing * 5;
+            Color ball_color = (breakout_state->selected_settings_section == BREAKOUT_SETTINGS_BALL_SIZE) ? YELLOW : WHITE;
+            DrawText("Ball Size", GetScreenWidth()/2 - MeasureText("Ball Size", 30)/2, ball_y, 30, ball_color);
+            DrawText(TextFormat("%.1f", breakout_state->ball_rad), GetScreenWidth()/2 - MeasureText("15", 30)/2, ball_y + 40, 30, GREEN);
 
             DrawText("Use UP/DOWN to navigate, LEFT/RIGHT to adjust", GetScreenWidth()/2 - MeasureText("Use UP/DOWN to navigate, LEFT/RIGHT to adjust", 20)/2, GetScreenHeight() - 50, 20, GRAY);
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight() - 20, 20, WHITE);

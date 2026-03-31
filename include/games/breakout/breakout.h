@@ -8,13 +8,17 @@
 #define PADDLE_HEIGHT 15
 #define PADDLE_SPEED 8
 #define BALL_RADIUS 6
+
+#define BRICK_NUM 100
 #define BRICK_MAX_ROWS 6
 #define BRICK_ROWS 5
 #define BRICK_MAX_COLS 15
 #define BRICK_COLS 10
 #define BRICK_PADD 5
 #define BRICK_HEIGHT 20
+
 #define LIVES_MAX 9
+
 #define VICTORY_SCREEN_DURATION 600 // 5 seconds at 120fps
 #define GAMEOVER_SCREEN_DURATION 600
 
@@ -31,6 +35,8 @@ typedef enum {
     BREAKOUT_SETTINGS_ROWS,
     BREAKOUT_SETTINGS_COLS,
     BREAKOUT_SETTINGS_LIVES,
+    BREAKOUT_SETTINGS_LEVEL,
+    BREAKOUT_SETTINGS_BALL_SIZE,
     BREAKOUT_SETTINGS_SECTION_COUNT
 } BreakoutSettingsSection;
 
@@ -55,9 +61,10 @@ typedef struct {
     Vector2 ball_speed;
     float ball_rad;
     bool ball_active;
+    float ball_speed_multiplier;
 
-    Rectangle bricks[100];
-    bool bricks_active[100];
+    Rectangle bricks[BRICK_NUM];
+    bool bricks_active[BRICK_NUM];
     int brick_count;
     int brick_rows;
     int brick_cols;
