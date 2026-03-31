@@ -4,6 +4,8 @@
 #include <raylib.h>
 #include "gamebox.h"
 
+#define VICTORY_SCREEN_DURATION 600 // 5 seconds at 120fps
+
 typedef enum {
     PAUSE_RESUME,
     PAUSE_RESTART,
@@ -58,6 +60,7 @@ typedef struct {
     Sound paddle_hit_sound;
     Sound score_sound;
     Sound wall_hit_sound;
+    Sound victory_sound;
 
     // Settings
     int difficulty_level; // 1-5, ULTIMATE=6

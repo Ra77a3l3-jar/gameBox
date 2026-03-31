@@ -36,6 +36,7 @@ void PongInit(void *state) {
     pong_state->paddle_hit_sound = LoadSound("assets/audio/pong/pong_paddle_hit.wav");
     pong_state->score_sound = LoadSound("assets/audio/pong/pong_score.wav");
     pong_state->wall_hit_sound = LoadSound("assets/audio/pong/pong_wall_hit.wav");
+    pong_state->victory_sound = LoadSound("assets/audio/pong/pong_victory.wav");
 
     pong_state->selected_pause = PAUSE_RESUME;
 
@@ -246,12 +247,14 @@ bool PongUpdate(void *state) {
         // Check for Victory
         if(pong_state->player_score >= pong_state->victory_points) {
             pong_state->victory_player = 0;
-            pong_state->victory_timer = 240; // 2s at 120fps
+            pong_state->victory_timer = VICTORY_SCREEN_DURATION;
             pong_state->current_screen = PONG_VICTORY;
+            PlaySound(pong_state->victory_sound);
         } else if(pong_state->oponent_score >= pong_state->victory_points) {
             pong_state->victory_player = 1;
-            pong_state->victory_timer = 240;
+            pong_state->victory_timer = VICTORY_SCREEN_DURATION;
             pong_state->current_screen = PONG_VICTORY;
+            PlaySound(pong_state->victory_sound);
         }
     }
     return true;
@@ -487,4 +490,5 @@ void PongClose(void *state) {
     UnloadSound(pong_state->paddle_hit_sound);
     UnloadSound(pong_state->score_sound);
     UnloadSound(pong_state->wall_hit_sound);
+    UnloadSound(pong_state->victory_sound);
 }
