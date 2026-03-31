@@ -15,6 +15,8 @@
 #define BRICK_PADD 5
 #define BRICK_HEIGHT 20
 #define LIVES_MAX 9
+#define VICTORY_SCREEN_DURATION 600 // 5 seconds at 120fps
+#define GAMEOVER_SCREEN_DURATION 600
 
 typedef enum {
     BREAKOUT_PAUSE_RESUME,
@@ -37,6 +39,8 @@ typedef enum {
     BREAKOUT_GAMEPLAY,
     BREAKOUT_PAUSED,
     BREAKOUT_SETTINGS,
+    BREAKOUT_VICTORY,
+    BREAKOUT_GAME_OVER,
 } BreakoutScreen;
 
 typedef struct {
@@ -65,9 +69,18 @@ typedef struct {
     int lives;
     bool game_over;
     bool victory;
+    int victory_timer;
+    int game_over_timer;
 
     int key_left;
     int key_right;
+
+    Sound paddle_sound;
+    Sound brick_sound;
+    Sound wall_hit_sound;
+    Sound lose_life_sound;
+    Sound game_over_sound;
+    Sound victory_sound;
 
     BreakoutPauseOption selected_pause;
     BreakoutSettingsSection selected_settings_section;

@@ -32,6 +32,15 @@ void BreakoutInit(BreakoutGameState *state) {
     breakout_state->key_left = KEY_LEFT;
     breakout_state->key_right = KEY_RIGHT;
 
+    breakout_state->paddle_sound = LoadSound("assets/audio/breakout/breakout_paddle.wav");
+    breakout_state->brick_sound = LoadSound("assets/audio/breakout/breakout_brick.wav");
+    breakout_state->lose_life_sound = LoadSound("assets/audio/breakout/breakout_lose_life.wav");
+    breakout_state->game_over_sound = LoadSound("assets/audio/breakout/breakout_game_over.wav");
+    breakout_state->victory_sound = LoadSound("assets/audio/breakout/breakout_victory.wav");
+
+    breakout_state->victory_timer = 0;
+    breakout_state->game_over_timer = 0;
+
     breakout_state->selected_pause = BREAKOUT_PAUSE_RESUME;
     breakout_state->selected_settings_section = BREAKOUT_SETTINGS_PADDLE_WIDTH;
 
@@ -69,7 +78,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
             breakout_state->current_screen = BREAKOUT_GAMEPLAY;
         } else if(breakout_state->current_screen == BREAKOUT_SETTINGS) {
             breakout_state->current_screen = breakout_state->prev_screen;
-        } else if(breakout_state->current_screen == BREAKOUT_SETTINGS) {
+        } else if(breakout_state->current_screen == BREAKOUT_MENU) {
             return false;
         }
     }
@@ -166,6 +175,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
             if(breakout_state->ball_position.x - breakout_state->ball_rad <= 0 ||
                 breakout_state->ball_position.x + breakout_state->ball_rad >= GetScreenWidth()) {
                 breakout_state->ball_speed.x *= -1;
+                PlaySound(breakout_state->wall_hit_sound);
             }
 
             if(breakout_state->ball_position.y - breakout_state->ball_rad <= 0) {
@@ -176,11 +186,15 @@ bool BreakoutUpdate(BreakoutGameState *state) {
             if(breakout_state->ball_position.y + breakout_state->ball_rad >= GetScreenHeight()) {
                 breakout_state->lives--;
                 breakout_state->ball_active = false;
+                PlaySound(breakout_state->wall_hit_sound);
 
                 if(breakout_state->lives <= 0) {
                     breakout_state->game_over = true;
-                    breakout_state->current_screen = BREAKOUT_MENU;
+                    breakout_state->current_screen = BREAKOUT_GAME_OVER;
+                    breakout_state->game_over_timer = GAMEOVER_SCREEN_DURATION;
+                    PlaySound(breakout_state->game_over_sound);
                 }
+                PlaySound(breakout_state->lose_life_sound);
             }
 
             // Ball collision with paddle
@@ -190,6 +204,7 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                 // Direction based on hit position
                 float relative_intersection = (breakout_state->ball_position.x - breakout_state->paddle.x) / breakout_state->paddle_width;
                 breakout_state->ball_speed.x = (relative_intersection - 0.5) * 10;
+                PlaySound(breakout_state->paddle_sound);
             }
 
             // Ball collision with bricks
@@ -199,6 +214,8 @@ bool BreakoutUpdate(BreakoutGameState *state) {
                     breakout_state->bricks_active[i] = false;
                     breakout_state->score += 1;
                     breakout_state->ball_speed.y *= -1;
+
+                    PlaySound(breakout_state->brick_sound);
 
                     // Check if all are destroyed
                     bool all_destroyed = true;
@@ -211,7 +228,9 @@ bool BreakoutUpdate(BreakoutGameState *state) {
 
                     if(all_destroyed) {
                         breakout_state->victory = true;
-                        breakout_state->current_screen = BREAKOUT_MENU;
+                        breakout_state->current_screen = BREAKOUT_VICTORY;
+                        breakout_state->victory_timer = VICTORY_SCREEN_DURATION;
+                        PlaySound(breakout_state->victory_sound);
                     }
                     break;
                 }
@@ -273,6 +292,38 @@ void BreakoutDraw(BreakoutGameState *state) {
 
             DrawText("Use UP/DOWN to navigate, LEFT/RIGHT to adjust", GetScreenWidth()/2 - MeasureText("Use UP/DOWN to navigate, LEFT/RIGHT to adjust", 20)/2, GetScreenHeight() - 50, 20, GRAY);
             DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 20)/2, GetScreenHeight() - 20, 20, WHITE);
+            break;
+        }
+        case BREAKOUT_VICTORY: {
+            DrawText("VICTORY!", GetScreenWidth()/2 - MeasureText("VICTORY!", 60)/2, GetScreenHeight()/2 - 100, 60, GREEN);
+            DrawText(TextFormat("Score: %d", breakout_state->score), GetScreenWidth()/2 - MeasureText("Score: 100", 40)/2, GetScreenHeight()/2, 40, WHITE);
+            DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 30)/2, GetScreenHeight()/2 + 80, 30, WHITE);
+
+            if(IsKeyPressed(KEY_ESCAPE)) {
+                breakout_state->current_screen = BREAKOUT_MENU;
+                BreakoutInit(breakout_state);
+            }
+
+            breakout_state->victory_timer--;
+            if(breakout_state->victory_timer <= 0) {
+                breakout_state->current_screen = BREAKOUT_MENU;
+                BreakoutInit(breakout_state);
+            }
+            break;
+        }
+        case BREAKOUT_GAME_OVER: {
+            DrawText("GAME OVER", GetScreenWidth()/2 - MeasureText("GAME OVER", 60)/2, GetScreenHeight()/2 - 100, 60, RED);
+            DrawText(TextFormat("Final Score: %d", breakout_state->score), GetScreenWidth()/2 - MeasureText("Final Score: 100", 40)/2, GetScreenHeight()/2, 40, WHITE);
+            DrawText("Press ESC to return", GetScreenWidth()/2 - MeasureText("Press ESC to return", 30)/2, GetScreenHeight()/2 + 80, 30, WHITE);
+
+            if(IsKeyPressed(KEY_ESCAPE)) {
+                BreakoutInit(breakout_state);
+            }
+
+            breakout_state->game_over_timer--;
+            if(breakout_state->game_over_timer <= 0) {
+                BreakoutInit(breakout_state);
+            }
             break;
         }
         case BREAKOUT_GAMEPLAY: {
@@ -354,5 +405,11 @@ void BreakoutDraw(BreakoutGameState *state) {
 }
 
 void BreakoutClose(BreakoutGameState *state) {
-
+    BreakoutGameState *breakout_state = (BreakoutGameState*)state;
+    UnloadSound(breakout_state->paddle_sound);
+    UnloadSound(breakout_state->brick_sound);
+    UnloadSound(breakout_state->wall_hit_sound);
+    UnloadSound(breakout_state->lose_life_sound);
+    UnloadSound(breakout_state->game_over_sound);
+    UnloadSound(breakout_state->victory_sound);
 }
